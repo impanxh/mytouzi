@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="format-detection" content="telephone=no">
+    <title>黄先生盯盘</title>
+    <link rel="stylesheet" href="http://i.gtimg.cn/vipstyle/frozenui/2.0.0/css/frozen.css">
+    <link rel="stylesheet" href="http://frozenui.github.io/frozenui/demo/demo.css" media="all"/>
+    <link rel="stylesheet" href="/static/awesome/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/css/H5.css" media="all"/>
+    <script src="http://i.gtimg.cn/vipstyle/frozenui/2.0.0/lib/zepto.min.js"></script>
+    <script src="http://i.gtimg.cn/vipstyle/frozenui/2.0.0/js/frozen.js"></script>
+</head>
+
+<body ontouchstart>
+<header class="ui-header">
+    <div style="text-align: center; " class="fc-666">
+        <i class="fa fa-clock-o" aria-hidden="true"></i>
+        <span class="fs14" th:text="${time}">time</span>
+        <span id="top-sx" style="margin-left:80px;">
+        <i class="fa fa-history" aria-hidden="true"></i>
+        </span>
+    </div>
+</header>
+<footer class="ui-footer fc-999 bt1px" style="padding: 5px 0px; height: 42px;">
+    <ul class="ui-tiled">
+        <li data-href="h5?p=index" class="ui-border-r">
+            <i class="fa fa-desktop fs18" aria-hidden="true"></i>
+            <div class="fs12">行情</div>
+        </li>
+        <li data-href="h5?p=dp" class="ui-border-r">
+            <i class="fa fa-dashboard fs20 fc-red" aria-hidden="true"></i>
+            <div class="fs12 fc-red">盯盘</div>
+        </li>
+        <li data-href="h5?p=user">
+            <i class="fa fa-user-circle-o fs20" aria-hidden="true"></i>
+            <div class="fs12">我的</div>
+        </li>
+    </ul>
+</footer>
+<section class="ui-container">
+
+    <section id="list">
+        <div class="demo-item">
+            <div class="demo-block">
+                <ul class="ui-tiled bt1px ui-bk">
+                    <li><div>名称编码</div></li>
+                    <li><div>时时价</div></li>
+                    <li><div>量比</div></li>
+                    <li><div>成交额</div></li>
+                    <li><div>静流入</div></li>
+                </ul>
+                <ul class="ui-tiled bt1px ui-bk" th:each="item, sta:${list}">
+                    <li><div style="text-align: left; width:150px; margin-right: 10px;" th:text="${item['name']}" th:class="${item['iscc']}=='是'?'bold red':''">cname</div></li>
+                    <li><div>
+                        <table style="border: 0px">
+                            <tr style="border: 0px">
+                                <td th:class="${item['zdf']}>=0?'fs20 bold red':'fs20 bold green'" style="border: 0px">
+                                    <span th:text="${item['dqj']}"></span>
+                                </td>
+                                <td th:class="${item['zdf']}>=0?'fs20 bold red':'fs20 bold green'" style="border: 0px">
+                                    <span th:text="${item['zdf']}>=0?'🡅':'🡇'"></span>
+                                </td>
+                                <td th:class="${item['zdf']}>=0?'red':'green'" style="border: 0px">
+                                    <span th:text="${#numbers.formatDecimal(item['dqj']-item['ztspj'],1,'COMMA',2,'POINT')}"></span><br/>
+                                    <span th:text="${item['zdf']}"></span>%
+                                </td>
+                            </tr>
+                        </table>
+
+                    </div></li>
+                    <li><div th:text="${item['cjl']}"></div></li>
+                    <li><div th:text="${item['jlr']}"></div></li>
+                    <li><div th:class="${item['lb']}>1?'bold red':'bold'" th:text="${item['lb']}"></div></li>
+                    <li><div><span th:text="${item['cjl']}"></span>亿</div></li>
+                    <li><div></div></li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+
+
+</section><!-- /.ui-container-->
+<script>
+    $('.ui-list li,.ui-tiled li').click(function(){
+        if($(this).data('href')){
+            location.href= $(this).data('href');
+        }
+    });
+
+    $('#top-sx').click(function(){
+        location.reload();
+    });
+</script>
+</body>
+</html>

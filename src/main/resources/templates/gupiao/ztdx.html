@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta http-equiv="refresh" content="3">
+    <title>涨停低吸监控模型</title>
+    <style type="text/css">
+        body{
+            background-color: #DDDDDD;
+        }
+        table {
+            border: 1px solid black;
+            text-align: center;
+            border-collapse: collapse;
+        }
+        table thead th {
+            border: 1px solid black;
+        }
+        table tbody td {
+            border: 1px solid black;
+            padding: 6px 10px;
+        }
+
+		h3{font-size:22px;}
+
+        .bold{font-weight: bold}
+        .green{color:#00d20d}
+        .red{color:#ff0000}
+        .orange{color:#ff6600}
+        .bgdz{background-color: #FFFFCC;}
+    </style>
+</head>
+<!--遍历数组-->
+<body>
+<script type="text/javascript">
+var showtime = function () {
+    var nowdate = new Date();
+    var year = nowdate.getFullYear(),
+
+        month = checkTime(nowdate.getMonth() + 1),
+
+        date = nowdate.getDate(),
+
+        day = nowdate.getDay(),
+
+        week = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"],
+
+        h = nowdate.getHours(),
+
+        m = nowdate.getMinutes(),
+
+        s = nowdate.getSeconds(),
+
+        h = checkTime(h),
+
+        m = checkTime(m),
+
+        s = checkTime(s);
+    return year + "-" + month + "-" + date + " " + h +":" + m + ":" + s;
+}
+
+var checkTime = function (i) {
+    if (i < 10) {
+        i = "0" + i;
+    }
+    return i;
+}
+
+var div = document.getElementById("showtime");
+
+setInterval (function() {
+
+	document.getElementById("showtime").innerHTML = showtime();
+
+}, 1000);  //反复执行函数
+
+</script>
+
+<table>
+    <tr style="border: 2px solid black; background-color: #CCC">
+        <td style="background-color: #ff0000"><a href="/gp/run?p=ztdx" target="_blank">启动自选监控</a></td>
+        <td style="background-color: #ff0000"><a href="/gp/run?p=all" target="_blank">启动全部个股监控</a></td>
+        <td style="background-color: #ff0000"><a href="/gp/run?p=hy" target="_blank">启动行业监控</a></td>
+        <td style="background-color: #ff0000"><a href="/gp/opt?key=all" target="_blank">停止跑数据</a></td>
+        <td style="background-color: #93D1FF"><a th:href="${'/gp/ztdx?px=' + px + '&hpx=zdf'}">行业涨跌幅</a></td>
+        <td style="background-color: #93D1FF"><a th:href="${'/gp/ztdx?px=' + px + '&hpx=lr'}">行业静流入</a></td>
+        <td style="background-color: #93D1FF"><a th:href="${'/gp/ztdx?px=' + px + '&hpx=zdb'}">行业涨跌比</a></td>
+        <td style="background-color: #93D1FF"><a th:href="${'/gp/ztdx?px=sort&hpx=' + hpx}">个股默认排序</a></td>
+        <td style="background-color: #93D1FF"><a th:href="${'/gp/ztdx?px=cate&hpx=' + hpx}">个股分类排</a></td>
+        <td style="background-color: #93D1FF"><a th:href="${'/gp/ztdx?px=15d&hpx=' + hpx}">个股15天板</a></td>
+        <td style="background-color: #93D1FF"><a th:href="${'/gp/ztdx?px=zkb&hpx=' + hpx}">个股赚亏比</a></td>
+        <td class="red"><h2 style="border:0px;margin:0px;padding:0px;" id="showtime" th:text="${time}">&nbsp;</h2></td>
+    </tr>
+</table>
+<br/>
+
+<table>
+    <tr style="border: 2px solid black; background-color: #EFEFEF">
+        <td>
+            <img src="http://image.sinajs.cn/newchart/min/n/sh000001.gif" style="width: 270px;">
+        </td>
+        <td>
+            <img src="http://image.sinajs.cn/newchart/min/n/sz399001.gif" style="width: 270px;">
+        </td>
+        <td>
+            <img src="http://image.sinajs.cn/newchart/min/n/sh000016.gif" style="width: 270px;">
+        </td>
+        <td>
+            <img src="http://image.sinajs.cn/newchart/min/n/sh000852.gif" style="width: 270px;">
+        </td>
+        <td>
+            <img src="http://image.sinajs.cn/newchart/min/n/sh000046.gif" style="width: 270px;">
+        </td>
+    </tr>
+</table>
+<br/>
+
+<!-- 监控  -->
+<table>
+	<!-- 自选监控 -->
+	<tr>
+	<td style="vertical-align:top; text-align: left;">
+		<h3 style="margin:0px; padding:0px;" th:class="${zxjkvo['zx_css']}">
+		自选监控#开盘（
+		总数：<span th:text="${zxjkvo['zx_gknum'] + '/' + zxjkvo['zx_allnum']}"></span>，
+		高开比：<span th:text="${zxjkvo['zx_gkb'] + '%'}"></span>，
+		均涨幅：<span th:text="${zxjkvo['zx_jzf'] + '%'}" th:class="${zxjkvo['zx_jzf']}>3?'red':'green'"></span>
+		）
+		</h3>
+	</td>
+	<td style="vertical-align:top; text-align: left; ">
+		<h3 style="margin:0px; padding:0px;" th:class="${zxjkvo['zx_sszdb']}>${zxjkvo['zx_gkb']}?'red':'green'">
+		实时（
+		涨跌比：<span style="font-size:14px;" th:text="${'[' + #numbers.formatDecimal((zxjkvo['zx_sszdb'] - zxjkvo['zx_gkb']),1,'COMMA',2,'POINT')  + '%]'}"></span><span th:text="${zxjkvo['zx_sszdb'] + '%'}"></span>，
+		均涨幅：<span style="font-size:14px;" th:text="${'[' + #numbers.formatDecimal((zxjkvo['zx_ssjzf'] - zxjkvo['zx_jzf']),1,'COMMA',2,'POINT') + '%]'}"></span><span th:text="${zxjkvo['zx_ssjzf'] + '%'}" th:class="${zxjkvo['zx_ssjzf']}>${zxjkvo['zx_jzf']}?'red':'green'"></span>，
+		赚亏比：<span th:text="${zxjkvo['zx_sszkb'] + '%'}" th:class="${zxjkvo['zx_sszkb']}>1?'red':'green'"></span>
+		）
+		</h3>
+	</td>
+	</tr>
+	<!-- 涨停监控 -->
+	<tr>
+	<td style="vertical-align:top; text-align: left; ">
+		<h3 style="margin:0px; padding:0px;" th:class="${ztjkvo['jk_css']}">
+		涨停监控#开盘（
+		总数：<span th:text="${ztjkvo['jk_gknum'] + '/' + ztjkvo['jk_allnum']}"></span>，
+		高开比：<span th:text="${ztjkvo['jk_gkb'] + '%'}"></span>，
+		均涨幅：<span th:text="${ztjkvo['jk_jzf'] + '%'}" th:class="${ztjkvo['jk_jzf']}>2.5?'red':'green'"></span>
+		）
+		</h3>
+	</td>
+	<td style="vertical-align:top; text-align: left; ">
+		<h3 style="margin:0px; padding:0px;" th:class="${ztjkvo['jk_sszdb']}>${ztjkvo['jk_gkb']}?'red':'green'">
+		实时（
+		涨跌比：<span style="font-size:14px;" th:text="${'[' + #numbers.formatDecimal((ztjkvo['jk_sszdb'] - ztjkvo['jk_gkb']),1,'COMMA',2,'POINT') + '%]'}"></span><span th:text="${ztjkvo['jk_sszdb'] + '%'}" th:class="${ztjkvo['jk_sszdb']}>=65?'red':'green'"></span>，
+		均涨幅：<span style="font-size:14px;" th:text="${'[' + #numbers.formatDecimal((ztjkvo['jk_ssjzf'] - ztjkvo['jk_jzf']),1,'COMMA',2,'POINT') + '%]'}"></span><span th:text="${ztjkvo['jk_ssjzf'] + '%'}" th:class="${ztjkvo['jk_ssjzf']}>${ztjkvo['jk_jzf']}?'red':'green'"></span>，
+		赚亏比：<span th:text="${ztjkvo['jk_sszkb'] + '%'}" th:class="${ztjkvo['jk_sszkb']}>1?'red':'green'"></span>
+		）
+		</h3>
+	</td>
+	</tr>
+	<!-- 跌停监控 -->
+	<tr>
+	<td style="vertical-align:top; text-align: left; ">
+		<h3 style="margin:0px; padding:0px;" th:class="${dtjkvo['jk_css']}">
+		跌停监控#开盘（
+		总数：<span th:text="${dtjkvo['jk_gknum'] + '/' + dtjkvo['jk_allnum']}"></span>，
+		高开比：<span th:text="${dtjkvo['jk_gkb'] + '%'}"></span>，
+		均涨幅：<span th:text="${dtjkvo['jk_jzf'] + '%'}" th:class="${dtjkvo['jk_jzf']}>2.5?'red':'green'"></span>
+		）
+		</h3>
+	</td>
+	<td style="vertical-align:top; text-align: left; ">
+		<h3 style="margin:0px; padding:0px;" th:class="${dtjkvo['jk_sszdb']}>${dtjkvo['jk_gkb']}?'red':'green'">
+		实时（
+		涨跌比：<span style="font-size:14px;" th:text="${'[' + #numbers.formatDecimal((dtjkvo['jk_sszdb'] - dtjkvo['jk_gkb']),1,'COMMA',2,'POINT') + '%]'}"></span><span th:text="${dtjkvo['jk_sszdb'] + '%'}" th:class="${dtjkvo['jk_sszdb']}>=60?'red':'green'"></span>，
+		均涨幅：<span style="font-size:14px;" th:text="${'[' + #numbers.formatDecimal((dtjkvo['jk_ssjzf'] - dtjkvo['jk_jzf']),1,'COMMA',2,'POINT') + '%]'}"></span><span th:text="${dtjkvo['jk_ssjzf'] + '%'}" th:class="${dtjkvo['jk_ssjzf']}>${dtjkvo['jk_jzf']}?'red':'green'"></span>，
+		赚亏比：<span th:text="${dtjkvo['jk_sszkb'] + '%'}" th:class="${dtjkvo['jk_sszkb']}>1?'red':'green'"></span>
+		）
+		</h3>
+	</td>
+	</tr>
+	<!-- 高板监控 -->
+	<tr>
+	<td style="vertical-align:top; text-align: left; ">
+		<h3 style="margin:0px; padding:0px;" th:class="${gbjkvo['jk_css']}">
+		高板监控#开盘（
+		总数：<span th:text="${gbjkvo['jk_gknum'] + '/' + gbjkvo['jk_allnum']}"></span>，
+		高开比：<span th:text="${gbjkvo['jk_gkb'] + '%'}"></span>，
+		均涨幅：<span th:text="${gbjkvo['jk_jzf'] + '%'}" th:class="${gbjkvo['jk_jzf']}>2.5?'red':'green'"></span>
+		）
+		</h3>
+	</td>
+	<td style="vertical-align:top; text-align: left; ">
+		<h3 style="margin:0px; padding:0px;" th:class="${gbjkvo['jk_sszdb']}>=60?'red':'green'">
+		实时（
+		涨跌比：<span style="font-size:14px;" th:text="${'[' + #numbers.formatDecimal((gbjkvo['jk_sszdb'] - gbjkvo['jk_gkb']),1,'COMMA',2,'POINT') + '%]'}"></span><span th:text="${gbjkvo['jk_sszdb'] + '%'}" th:class="${gbjkvo['jk_sszdb']}>=65?'red':'green'"></span>，
+		均涨幅：<span style="font-size:14px;" th:text="${'[' + #numbers.formatDecimal((gbjkvo['jk_ssjzf'] - gbjkvo['jk_jzf']),1,'COMMA',2,'POINT') + '%]'}" th:class="${gbjkvo['jk_ssjzf']}>${gbjkvo['jk_jzf']}?'red':'green'"></span><span th:text="${gbjkvo['jk_ssjzf'] + '%'}" th:class="${gbjkvo['jk_ssjzf']}>${gbjkvo['jk_jzf']}?'red':'green'"></span>，
+		赚亏比：<span th:text="${gbjkvo['jk_sszkb'] + '%'}" th:class="${gbjkvo['jk_sszkb']}>1?'red':'green'"></span>
+		）
+		</h3>
+	</td>
+	</tr>
+	
+	<!-- 行业监控 -->
+	<tr>
+	<td style="vertical-align:top; text-align: left; ">
+		<h3 style="margin:0px; padding:0px;" th:class="${hygpjkvo['jk_css']}">
+		行业监控#开盘（
+		总数：<span th:text="${hygpjkvo['jk_gknum'] + '/' + hygpjkvo['jk_allnum']}"></span>，
+		高开比：<span th:text="${hygpjkvo['jk_gkb'] + '%'}"></span>，
+		均涨幅：<span th:text="${hygpjkvo['jk_jzf'] + '%'}" th:class="${hygpjkvo['jk_jzf']}>2.5?'red':'green'"></span>
+		）
+		</h3>
+	</td>
+	<td style="vertical-align:top; text-align: left; ">
+		<h3 style="margin:0px; padding:0px;" th:class="${hygpjkvo['jk_sszdb']}>${hygpjkvo['jk_gkb']}?'red':'green'">
+		实时（
+		涨跌比：<span style="font-size:14px;" th:text="${'[' + #numbers.formatDecimal((hygpjkvo['jk_sszdb'] - hygpjkvo['jk_gkb']),1,'COMMA',2,'POINT') + '%]'}"></span><span th:text="${hygpjkvo['jk_sszdb'] + '%'}" th:class="${hygpjkvo['jk_sszdb']}>=60?'red':'green'"></span>，
+		均涨幅：<span style="font-size:14px;" th:text="${'[' + #numbers.formatDecimal((hygpjkvo['jk_ssjzf'] - hygpjkvo['jk_jzf']),1,'COMMA',2,'POINT') + '%]'}"></span><span th:text="${hygpjkvo['jk_ssjzf'] + '%'}" th:class="${hygpjkvo['jk_ssjzf']}>${hygpjkvo['jk_jzf']}?'red':'green'"></span>，
+		赚亏比：<span th:text="${hygpjkvo['jk_sszkb'] + '%'}" th:class="${hygpjkvo['jk_sszkb']}>1?'red':'green'"></span>
+		）
+		</h3>
+	</td>
+	</tr>
+	
+</table>
+	
+<br/>
+<table>
+<tr>
+<td style="vertical-align:top; display:; ">
+
+<table>
+    <tr style="border: 1px solid black; background-color: #93D1FF;">
+        <td width="120">分类</td>
+        <td>涨跌%</td>
+        <!-- <td>成交</td> 
+        <td>净流</td>-->
+        <td>涨跌数</td>
+    </tr>
+    <tr th:each="item, sta:${hylist}"  style="border: 1px solid black; background-color: #EFEFEF">
+        <td>
+            <a target="_blank" th:href="'http://q.10jqka.com.cn/thshy/detail/code/' + ${item['cid']} + '/'">
+            <span th:text="${item['cname']}" ></span>
+        </a>
+        </td>
+        <td><span th:text="${item['zdf']} + '%'" class="bold" th:class="${item['zdf']}>=0?'red':'green'"></span></td>
+        <!-- <td><span th:text="${item['cjl']}"></span></td>
+        <td><span th:text="${item['jlr']}" th:class="${item['jlr']}>=0?'red':'green'"></span></td>-->
+        <td><span th:text="${item['zhang']}" class="bold red"></span>/<span th:text="${item['die']}" class="bold green"></span>/<span th:text="${item['zdb']}" class="bold"></span>%</td>
+    </tr>
+</table>
+
+</td>
+
+<td style="vertical-align:top;">
+
+<!-- 自选列表 -->
+<table style="float:;">
+    <tr style="background-color: #146aa2">
+        <td>编码</td>
+        <td>名称</td>
+        <td>分类</td>
+        <td>标识</td>
+        <td>涨跌幅</td>
+        <td>封板</td>
+        <td>连板&15d</td>
+        <td>开涨跌</td>
+        <td>计划操作</td>
+        <td>赚亏比</td>
+        <td>15d量</td>
+        <td>昨天涨跌</td>
+        <td>评分</td>
+    </tr>
+    <tr th:each="item, sta:${zxlist}" th:class="${item['kpzdb']}>=0?'':'bgdz'">
+        <td style="line-height:35px;"><a th:href="${'http://stockpage.10jqka.com.cn/'+ #strings.substring(item['cid'],2,8) + '/#refCountId=stockpage_5c3e9aef_93'}" target="_blank"><span th:text="${#strings.substring(item['cid'],2,8)}"></span></a></td>
+        <td th:text="${item['name']}"></td>
+        <td>
+        	<a target="_blank" th:href="'http://q.10jqka.com.cn/thshy/detail/code/' + ${item['hyid']} + '/'">
+            <span th:text="${item['cate']}"></span>
+       		</a>
+        	(
+        	<span th:text="${item['hyzd']>0?item['hyzd'] + '%':''}" th:class="${item['hyzd']}>0?'red':''"></span>
+        	<span th:text="${item['hyzd']==0.0?'0%':''}"></span>
+        	<span th:text="${item['hyzd']<0?item['hyzd'] + '%':''}" th:class="${item['hyzd']}<0?'green':''"></span>
+        	)
+        </td>
+        <td th:text="${item['bsstr']}"></td>
+        <td th:text="${item['zdf']} + '%'" th:class="${item['zdf']}>=0?'bold red':'bold green'"></td>
+        <td th:text="${item['fbstr']}"></td>
+        <td th:text="${item['lbstr'] + '|' + item['ban15d']}"></td>
+        
+        <td>
+        	<span th:text="${item['kpzdb']>0?item['kpzdb'] + '%':''}" th:class="${item['kpzdb']}>0?'bold red':''"></span>
+        	<span th:text="${item['kpzdb']==0.0?'0%':''}" th:class="${item['kpzdb']==0.0?'bold':''}"></span>
+        	<span th:text="${item['kpzdb']<0?item['kpzdb'] + '%':''}" th:class="${item['kpzdb']}<0?'bold green':''"></span>
+        
+        </td>
+        
+        <td th:text="${item['czstr']}"></td>
+        <td>
+        	<span th:text="${item['zkb']>0?item['zkb'] + '%':''}" th:class="${item['zkb']}>0?'bold red':''"></span>
+        	<span th:text="${item['zkb']==0.0?'-':''}"></span>
+        	<span th:text="${item['zkb']<0?item['zkb'] + '%':''}" th:class="${item['zkb']}<0?'bold green':''"></span>
+        </td>
+        <td th:text="${item['liang15d']}"></td>
+        <td th:text="${item['ztzd']}" th:class="${item['ztzd']} == '昨涨'?'bold red':''"></td>
+        <td th:text="${item['score']}"></td>
+    </tr>
+</table>
+
+<br/>
+<h3>昨天涨停列表</h3>
+<!-- 连板内容 -->
+<table style="float:;">
+    <tr style="background-color: #146aa2">
+        <td>编码</td>
+        <td>名称</td>
+        <td>分类</td>
+        <td>涨跌幅</td>
+        <td>开涨跌</td>
+        <td>赚亏比</td>
+    </tr>
+    <tr th:each="item, sta:${ztlist}" th:class="${item['kpzdf']}>=0?'':'bgdz'">
+        <td style="line-height:35px;"><a th:href="${'http://stockpage.10jqka.com.cn/'+ #strings.substring(item['cid'],2,8) + '/#refCountId=stockpage_5c3e9aef_93'}" target="_blank"><span th:text="${#strings.substring(item['cid'],2,8)}"></span></a></td>
+        <td th:text="${item['name']}"></td>
+        <td>
+            <span th:text="${item['cate']}"></span>
+        </td>
+        <td th:text="${item['zdf']} + '%'" th:class="${item['zdf']}>=0?'bold red':'bold green'"></td>
+        <td>
+        	<span th:text="${item['kpzdf']>0?item['kpzdf'] + '%':''}" th:class="${item['kpzdf']}>0?'bold red':''"></span>
+        	<span th:text="${item['kpzdf']==0.0?'0%':''}" th:class="${item['kpzdf']==0.0?'bold':''}"></span>
+        	<span th:text="${item['kpzdf']<0?item['kpzdf'] + '%':''}" th:class="${item['kpzdf']}<0?'bold green':''"></span>
+        
+        </td>
+        <td>
+        	<span th:text="${item['zkb']>0?item['zkb'] + '%':''}" th:class="${item['zkb']}>0?'bold red':''"></span>
+        	<span th:text="${item['zkb']==0.0?'-':''}"></span>
+        	<span th:text="${item['zkb']<0?item['zkb'] + '%':''}" th:class="${item['zkb']}<0?'bold green':''"></span>
+        </td>
+    </tr>
+</table>
+
+<br/>
+<h3>昨天跌停列表</h3>
+<!-- 连板内容 -->
+<table style="float:;">
+    <tr style="background-color: #146aa2">
+        <td>编码</td>
+        <td>名称</td>
+        <td>分类</td>
+        <td>涨跌幅</td>
+        <td>开涨跌</td>
+        <td>赚亏比</td>
+    </tr>
+    <tr th:each="item, sta:${dtlist}" th:class="${item['kpzdf']}>=0?'':'bgdz'">
+        <td style="line-height:35px;"><a th:href="${'http://stockpage.10jqka.com.cn/'+ #strings.substring(item['cid'],2,8) + '/#refCountId=stockpage_5c3e9aef_93'}" target="_blank"><span th:text="${#strings.substring(item['cid'],2,8)}"></span></a></td>
+        <td th:text="${item['name']}"></td>
+        <td>
+            <span th:text="${item['cate']}"></span>
+        </td>
+        <td th:text="${item['zdf']} + '%'" th:class="${item['zdf']}>=0?'bold red':'bold green'"></td>
+        <td>
+        	<span th:text="${item['kpzdf']>0?item['kpzdf'] + '%':''}" th:class="${item['kpzdf']}>0?'bold red':''"></span>
+        	<span th:text="${item['kpzdf']==0.0?'0%':''}" th:class="${item['kpzdf']==0.0?'bold':''}"></span>
+        	<span th:text="${item['kpzdf']<0?item['kpzdf'] + '%':''}" th:class="${item['kpzdf']}<0?'bold green':''"></span>
+        
+        </td>
+        <td>
+        	<span th:text="${item['zkb']>0?item['zkb'] + '%':''}" th:class="${item['zkb']}>0?'bold red':''"></span>
+        	<span th:text="${item['zkb']==0.0?'-':''}"></span>
+        	<span th:text="${item['zkb']<0?item['zkb'] + '%':''}" th:class="${item['zkb']}<0?'bold green':''"></span>
+        </td>
+    </tr>
+</table>
+
+<br/>
+<h3>高板列表</h3>
+<!-- 连板内容 -->
+<table style="float:;">
+    <tr style="background-color: #146aa2">
+        <td>编码</td>
+        <td>名称</td>
+        <td>分类</td>
+        <td>涨跌幅</td>
+        <td>开涨跌</td>
+        <td>赚亏比</td>
+    </tr>
+    <tr th:each="item, sta:${gblist}" th:class="${item['kpzdf']}>=0?'':'bgdz'">
+        <td style="line-height:35px;"><a th:href="${'http://stockpage.10jqka.com.cn/'+ #strings.substring(item['cid'],2,8) + '/#refCountId=stockpage_5c3e9aef_93'}" target="_blank"><span th:text="${#strings.substring(item['cid'],2,8)}"></span></a></td>
+        <td th:text="${item['name']}"></td>
+        <td>
+            <span th:text="${item['cate']}"></span>
+        </td>
+        <td th:text="${item['zdf']} + '%'" th:class="${item['zdf']}>=0?'bold red':'bold green'"></td>
+        <td>
+        	<span th:text="${item['kpzdf']>0?item['kpzdf'] + '%':''}" th:class="${item['kpzdf']}>0?'bold red':''"></span>
+        	<span th:text="${item['kpzdf']==0.0?'0%':''}" th:class="${item['kpzdf']==0.0?'bold':''}"></span>
+        	<span th:text="${item['kpzdf']<0?item['kpzdf'] + '%':''}" th:class="${item['kpzdf']}<0?'bold green':''"></span>
+        
+        </td>
+        <td>
+        	<span th:text="${item['zkb']>0?item['zkb'] + '%':''}" th:class="${item['zkb']}>0?'bold red':''"></span>
+        	<span th:text="${item['zkb']==0.0?'-':''}"></span>
+        	<span th:text="${item['zkb']<0?item['zkb'] + '%':''}" th:class="${item['zkb']}<0?'bold green':''"></span>
+        </td>
+    </tr>
+</table>
+
+<br/>
+<h3>行业列表</h3>
+<table style="float:;">
+    <tr style="background-color: #146aa2">
+        <td>编码</td>
+        <td>名称</td>
+        <td>分类</td>
+        <td>涨跌幅</td>
+        <td>开涨跌</td>
+        <td>赚亏比</td>
+    </tr>
+    <tr th:each="item, sta:${hygplist}" th:class="${item['kpzdf']}>=0?'':'bgdz'">
+        <td style="line-height:35px;"><a th:href="${'http://stockpage.10jqka.com.cn/'+ #strings.substring(item['cid'],2,8) + '/#refCountId=stockpage_5c3e9aef_93'}" target="_blank"><span th:text="${#strings.substring(item['cid'],2,8)}"></span></a></td>
+        <td th:text="${item['name']}"></td>
+        <td>
+            <span th:text="${item['cate']}"></span>
+        </td>
+        <td th:text="${item['zdf']} + '%'" th:class="${item['zdf']}>=0?'bold red':'bold green'"></td>
+        <td>
+        	<span th:text="${item['kpzdf']>0?item['kpzdf'] + '%':''}" th:class="${item['kpzdf']}>0?'bold red':''"></span>
+        	<span th:text="${item['kpzdf']==0.0?'0%':''}" th:class="${item['kpzdf']==0.0?'bold':''}"></span>
+        	<span th:text="${item['kpzdf']<0?item['kpzdf'] + '%':''}" th:class="${item['kpzdf']}<0?'bold green':''"></span>
+        
+        </td>
+        <td>
+        	<span th:text="${item['zkb']>0?item['zkb'] + '%':''}" th:class="${item['zkb']}>0?'bold red':''"></span>
+        	<span th:text="${item['zkb']==0.0?'-':''}"></span>
+        	<span th:text="${item['zkb']<0?item['zkb'] + '%':''}" th:class="${item['zkb']}<0?'bold green':''"></span>
+        </td>
+    </tr>
+</table>
+
+
+</td>
+</tr>
+</table>
+</body>
+</html>

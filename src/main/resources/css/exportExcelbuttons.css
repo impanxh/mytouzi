@@ -1,0 +1,23 @@
+div.dt-buttons{
+      float: right;
+      margin: 5px 0;
+    }
+   a.green{
+    border: 0;
+    font-size: 16px;
+    height: 35px;
+    line-height: 35px;
+    text-align: center;
+    background: #ff9966;
+    color: #fff;
+    cursor: pointer;
+    display: inline-block;
+    padding: 0 15px;
+    text-decoration: none;
+    font-weight: 600;
+    letter-spacing: 2px;
+    }
+#ptable_length {
+    float: right;
+    padding: 10px 0 10px;
+}   

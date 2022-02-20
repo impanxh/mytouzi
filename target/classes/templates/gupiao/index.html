@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta http-equiv="refresh" content="3">
+    <title>放量监控</title>
+    <style type="text/css">
+        body{
+            background-color: #EFEFEF;
+        }
+        table {
+            border: 1px solid black;
+            text-align: center;
+            border-collapse: collapse;
+        }
+        table thead th {
+            border: 1px solid black;
+        }
+        table tbody td {
+            border: 1px solid black;
+            padding: 6px 10px;
+        }
+    </style>
+</head>
+<!--遍历数组-->
+<body>
+<table>
+    <tr style="border: 2px solid black; background-color: #CCC">
+        <td style="background-color: #ff0000"><a href="/gupiaoRun" target="_blank">启动</a></td>
+        <td><a href="/gupiao?opt=num">序号排序</a></td>
+        <td><a href="/gupiao?opt=cate">行业排序</a></td>
+        <td><a href="/gupiao?opt=opt">操作排序</a></td>
+        <td><a href="/gupiao?opt=zfd">涨幅度排序</a></td>
+        <td><a href="/gupiao?opt=fk">浮亏排序</a></td>
+    </tr>
+</table>
+<br/>
+<p>大盘50天数据</p>
+<table>
+    <tr style="border: 2px solid black; background-color: #EFEFEF">
+        <td>涨：<span th:text="${dp['zfd']}"></span>%(<span th:text="${dp['znum']}"></span>)<br/>
+            跌：<span th:text="${dp['dfd']}"></span>%(<span th:text="${dp['dnum']}"></span>)
+        </td>
+        <td>
+            平均涨幅：<span th:text="${dp['avezhang']}"></span>%<br/>
+            平均跌幅：<span th:text="${dp['avedie']}"></span>%<br/>
+            最高涨幅：<span th:text="${dp['maxzhang']}"></span>%<br/>
+            最低跌幅：<span th:text="${dp['minzhang']}"></span>%<br/>
+            平均振幅：<span th:text="${dp['avezf']}"></span>%<br/>
+        </td>
+        <td>
+            最新价：<span th:text="${szvo['jtspj']}"></span><br/>
+            今日开盘价：<span th:text="${szvo['kpj']}"></span><br/>
+            昨日收盘价：<span th:text="${szvo['ztspj']}"></span><br/>
+            今日最高价：<span th:text="${szvo['zgj']}"></span><br/>
+            今日最低价：<span th:text="${szvo['zdj']}"></span><br/>
+            涨跌幅：<span th:text="${szvo['zdf']}"></span>%<br/>
+            振幅度：<span th:text="${szvo['zfd']}"></span>%<br/>
+            成交总金额：<span th:text="${szvo['ttprice']}"></span>亿<br/>
+        </td>
+    </tr>
+    <tr style="border: 2px solid black; background-color: #CCC">
+        <td>预测平均：<span th:text="${dp['dd']+'~'+dp['gd']}"></span><br/>
+            预测高值：<span th:text="${dp['zd']+'~'+dp['zg']}"></span>
+        </td>
+        <td>
+            当前压力位：<span>3622</span><br/>
+            当前支撑位：<span>3450</span><br/>
+            压力位：<span th:text="${dp['zdylw']}"></span><br/>
+            支撑位：<span th:text="${dp['zdzcw']}"></span>
+        </td>
+        <td style="background-color: #ffffff">
+            <img src="http://image.sinajs.cn/newchart/min/n/sh000001.gif" style="width: 500px;">
+            <img src="http://image.sinajs.cn/newchart/min/n/sh000300.gif" style="width: 500px;">
+        </td>
+    </tr>
+</table>
+<br/>
+<table>
+    <tr style="background-color: #146aa2">
+        <td>序号</td>
+        <td>编码</td>
+        <td>名称</td>
+        <td>行业</td>
+        <td>等级</td>
+        <td>操作</td>
+        <td>当前价</td>
+        <td>买入价格</td>
+        <td>当前涨幅</td>
+        <td>买入时涨幅</td>
+        <td>浮亏</td>
+        <td>买入时间</td>
+        <td>当前量</td>
+        <td>昨日量</td>
+        <td>平均量</td>
+        <td>最终量</td>
+        <td>最大量</td>
+    </tr>
+    <tr th:each="item, sta:${lianglist}">
+        <td th:text="${item['num']}"></td>
+        <td><a th:href="${'http://stockpage.10jqka.com.cn/'+ #strings.substring(item['cid'],2,8) + '/#refCountId=stockpage_5c3e9aef_93'}" target="_blank"><span th:text="${item['cid']}"></span></a></td>
+        <td th:text="${item['name']}"></td>
+        <td th:text="${item['cate']}"></td>
+        <td th:text="${item['level']}"></td>
+        <td th:text="${item['opt']}"></td>
+        <td th:text="${item['thisPrice']}"></td>
+        <td th:text="${item['buyPrice']}"></td>
+        <td th:text="${item['thisZdf'] + '%'}"></td>
+        <td th:text="${item['buyZdf'] + '%'}"></td>
+        <td th:text="${item['fukui'] + '(' + item['buyNum']  + '手)'}"></td>
+        <td th:text="${item['buyTime']}"></td>
+        <td th:text="${item['thisLiang']+ '亿'}"></td>
+        <td th:text="${item['oneday'] + '亿'}"></td>
+        <td th:text="${item['aveAll'] + '亿'}"></td>
+        <td th:text="${item['avefin'] + '亿'}"></td>
+        <td th:text="${item['avemax'] + '亿'}"></td>
+    </tr>
+</table>
+</body>
+</html>
