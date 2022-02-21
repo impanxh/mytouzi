@@ -5,4 +5,5 @@
 .settings/org.eclipse.jdt.apt.core.prefs
 .settings/org.eclipse.jdt.core.prefs
 .settings/org.eclipse.m2e.core.prefs
-target/classes/META-INF/maven/com.huangxifeng/mytouzi/pom.properties
+target/
+.settings/org.springframework.ide.eclipse.prefs
