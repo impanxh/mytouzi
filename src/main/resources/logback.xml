@@ -2,4 +2,10 @@
 <configuration>
     <include resource="org/springframework/boot/logging/logback/base.xml" />
     <logger name="*" level="warn" />
+    
+    <logger name="org.apache.http.impl.execchain" level="ERROR" />
+    <logger name="com.gargoylesoftware.htmlunit" level="ERROR" />
+    
+    
+    
 </configuration>

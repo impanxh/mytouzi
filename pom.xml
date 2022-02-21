@@ -115,6 +115,38 @@
             <version>2.4</version> 
         </dependency>
         
+        
+        
+        <dependency>
+			<groupId>org.codehaus.groovy</groupId>
+			<artifactId>groovy-all</artifactId>
+			<version>2.4.19</version>
+		</dependency>
+		
+		   <dependency>
+            <groupId>net.sourceforge.htmlunit</groupId>
+            <artifactId>htmlunit</artifactId>
+            <version>2.35.0</version>
+   	 </dependency>
+		 
+
+		<dependency>
+			<groupId>com.panguo.dynamic</groupId>
+			<artifactId>core</artifactId>
+			<scope>system</scope>
+			<version>1.0</version>
+			<systemPath>/Users/xinghuapan/Documents/gupiao/mytouzi/lib/bean-core.jar</systemPath>
+		</dependency>
+		
+		
+		<dependency>
+			<groupId>com.panguo.dynamic</groupId>
+			<artifactId>run</artifactId>
+			<scope>system</scope>
+			<version>1.0</version>
+			<systemPath>/Users/xinghuapan/Documents/gupiao/mytouzi/lib/dynamic-controller.jar</systemPath>
+		</dependency>
+        
 	</dependencies>
 
 	<build>

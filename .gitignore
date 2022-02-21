@@ -7,3 +7,7 @@
 .settings/org.eclipse.m2e.core.prefs
 target/
 .settings/org.springframework.ide.eclipse.prefs
+src/main/resources/.DS_Store
+src/main/.DS_Store
+src/.DS_Store
+lib/.DS_Store
