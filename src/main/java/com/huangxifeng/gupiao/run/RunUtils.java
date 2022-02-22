@@ -183,7 +183,7 @@ public class RunUtils {
 	public static List<String> getZhangTingList(String date) {
 
 		String ztgpfile = StringPool.PROJECT_DIR + "/data/ztlist/ztgp-" + date + ".txt";
-		String ztdayfile = StringPool.PROJECT_DIR + "/data/ztlist/ztgp.txt";
+		String ztdayfile = StringPool.PROJECT_DIR + "/data/run/ztgp.txt";
 
 		try {
 
@@ -398,7 +398,7 @@ public class RunUtils {
 	{
 
 		String dtgpfile = StringPool.PROJECT_DIR + "/data/dtlist/dtgp-" + date + ".txt";
-		String dtdayfile = StringPool.PROJECT_DIR + "/data/dtlist/dtgp.txt";
+		String dtdayfile = StringPool.PROJECT_DIR + "/data/run/dtgp.txt";
 
 		try {
 

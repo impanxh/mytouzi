@@ -75,17 +75,17 @@ public class RunDatas {
 		// 涨停龙头低吸
 		RunDatas.runLongtouDixiGP(true);  //我主要做这个
 		
-//		// 涨停列表
-//		RunUtils.getZhangTingList();
-//		
-//		// 跌停列表
-//		RunUtils.getDieTingList();
-//		
-//		//高板股票 15天5天涨停列表
-//		RunDatas.runGaoBanGP();
-//		
-//		//行业监控票（15天5次涨停，3天1次涨停）
-//		RunDatas.runHangYeJKGP();
+		// 涨停列表
+		RunUtils.getZhangTingList();
+		
+		// 跌停列表
+		RunUtils.getDieTingList();
+		
+		//高板股票 15天5天涨停列表
+		RunDatas.runGaoBanGP();
+		
+		//行业监控票（15天5次涨停，3天1次涨停）
+		RunDatas.runHangYeJKGP();
 
 		// 大跌震荡行情股票
 		//runZhengdangGP();
@@ -2030,7 +2030,7 @@ public class RunDatas {
 	{
 		String date = DateUtil.format(new Date(), DateUtil.YYYYMMDD);
 		String dxgpfile = StringPool.PROJECT_DIR + "/data/dxlist/dxgp-" + date + ".txt";
-		String dxdayfile = StringPool.PROJECT_DIR + "/data/dxlist/dxgp.txt";
+		String dxdayfile = StringPool.PROJECT_DIR + "/data/run/dxgp.txt";
 
 		try {
 
@@ -2229,7 +2229,7 @@ public class RunDatas {
 	{
 		String date = DateUtil.format(new Date(), DateUtil.YYYYMMDD);
 		String gbgpfile = StringPool.PROJECT_DIR + "/data/jklist/gbgp-" + date + ".txt";
-		String gbdayfile = StringPool.PROJECT_DIR + "/data/jklist/gbgp.txt";
+		String gbdayfile = StringPool.PROJECT_DIR + "/data/run/gbgp.txt";
 
 		try {
 
@@ -2315,7 +2315,7 @@ public class RunDatas {
 	{
 		String date = DateUtil.format(new Date(), DateUtil.YYYYMMDD);
 		String hygpfile = StringPool.PROJECT_DIR + "/data/jklist/hygp-" + date + ".txt";
-		String hydayfile = StringPool.PROJECT_DIR + "/data/jklist/hygp.txt";
+		String hydayfile = StringPool.PROJECT_DIR + "/data/run/hygp.txt";
 
 		try {
 
