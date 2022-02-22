@@ -30,6 +30,10 @@
         .red{color:#ff0000}
         .orange{color:#ff6600}
         .bgdz{background-color: #FFFFCC;}
+        .buy-bgc{background-color: #AEEFFF;}
+        .zhuan-bgc{background-color: #FFCCCC;}
+        .kui-bgc{background-color: #BDFFEA;}
+        
     </style>
 </head>
 <!--遍历数组-->
@@ -194,7 +198,7 @@ setInterval (function() {
 		</h3>
 	</td>
 	<td style="vertical-align:top; text-align: left; ">
-		<h3 style="margin:0px; padding:0px;" th:class="${gbjkvo['jk_sszdb']}>=60?'red':'green'">
+		<h3 style="margin:0px; padding:0px;" th:class="${gbjkvo['jk_sszdb']}>${gbjkvo['jk_gkb']}?'red':'green'">
 		实时（
 		涨跌比：<span style="font-size:14px;" th:text="${'[' + #numbers.formatDecimal((gbjkvo['jk_sszdb'] - gbjkvo['jk_gkb']),1,'COMMA',2,'POINT') + '%]'}"></span><span th:text="${gbjkvo['jk_sszdb'] + '%'}" th:class="${gbjkvo['jk_sszdb']}>=65?'red':'green'"></span>，
 		均涨幅：<span style="font-size:14px;" th:text="${'[' + #numbers.formatDecimal((gbjkvo['jk_ssjzf'] - gbjkvo['jk_jzf']),1,'COMMA',2,'POINT') + '%]'}" th:class="${gbjkvo['jk_ssjzf']}>${gbjkvo['jk_jzf']}?'red':'green'"></span><span th:text="${gbjkvo['jk_ssjzf'] + '%'}" th:class="${gbjkvo['jk_ssjzf']}>${gbjkvo['jk_jzf']}?'red':'green'"></span>，
@@ -265,15 +269,16 @@ setInterval (function() {
         <td>名称</td>
         <td>分类</td>
         <td>标识</td>
-        <td>涨跌幅</td>
-        <td>封板</td>
         <td>连板&15d</td>
+        <td>封板</td>
+        <td>筹码</td>
+        <td>涨跌幅</td>
         <td>开涨跌</td>
-        <td>计划操作</td>
         <td>赚亏比</td>
-        <td>15d量</td>
-        <td>昨天涨跌</td>
+        <!-- <td>15d量</td> -->
+        <!-- <td>昨天涨跌</td> -->
         <td>评分</td>
+        <td>计划操作</td>
     </tr>
     <tr th:each="item, sta:${zxlist}" th:class="${item['kpzdb']}>=0?'':'bgdz'">
         <td style="line-height:35px;"><a th:href="${'http://stockpage.10jqka.com.cn/'+ #strings.substring(item['cid'],2,8) + '/#refCountId=stockpage_5c3e9aef_93'}" target="_blank"><span th:text="${#strings.substring(item['cid'],2,8)}"></span></a></td>
@@ -289,26 +294,25 @@ setInterval (function() {
         	)
         </td>
         <td th:text="${item['bsstr']}"></td>
-        <td th:text="${item['zdf']} + '%'" th:class="${item['zdf']}>=0?'bold red':'bold green'"></td>
-        <td th:text="${item['fbstr']}"></td>
         <td th:text="${item['lbstr'] + '|' + item['ban15d']}"></td>
-        
-        <td>
+        <td th:text="${item['fbstr']}"></td>
+        <td th:text="${item['cmstr']}"></td>
+        <td th:text="${item['zdf']} + '%'" th:class="${item['zdf']}>=0?'bold red':'bold green'"></td>
+        <td th:class="${item['kpzdb']}<=3?'buy-bgc':''">
         	<span th:text="${item['kpzdb']>0?item['kpzdb'] + '%':''}" th:class="${item['kpzdb']}>0?'bold red':''"></span>
         	<span th:text="${item['kpzdb']==0.0?'0%':''}" th:class="${item['kpzdb']==0.0?'bold':''}"></span>
         	<span th:text="${item['kpzdb']<0?item['kpzdb'] + '%':''}" th:class="${item['kpzdb']}<0?'bold green':''"></span>
         
         </td>
-        
-        <td th:text="${item['czstr']}"></td>
-        <td>
+        <td th:class="${item['zkb']}>=0?'zhuan-bgc':'kui-bgc'">
         	<span th:text="${item['zkb']>0?item['zkb'] + '%':''}" th:class="${item['zkb']}>0?'bold red':''"></span>
         	<span th:text="${item['zkb']==0.0?'-':''}"></span>
         	<span th:text="${item['zkb']<0?item['zkb'] + '%':''}" th:class="${item['zkb']}<0?'bold green':''"></span>
         </td>
-        <td th:text="${item['liang15d']}"></td>
-        <td th:text="${item['ztzd']}" th:class="${item['ztzd']} == '昨涨'?'bold red':''"></td>
-        <td th:text="${item['score']}"></td>
+        <!-- <td th:text="${item['liang15d']}"></td> -->
+        <!-- <td th:text="${item['ztzd']}" th:class="${item['ztzd']} == '昨涨'?'bold red':''"></td> -->
+        <td th:text="${item['score']}" th:class="${item['score']} >= 18 ?'bold red':''"></td>
+        <td th:text="${item['czstr']}"></td>
     </tr>
 </table>
 

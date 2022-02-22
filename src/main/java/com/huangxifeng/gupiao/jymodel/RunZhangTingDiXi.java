@@ -26,52 +26,52 @@ public class RunZhangTingDiXi {
 
 	public static void main(String[] args) {
 		// runTiaoKongList();
-		// runData();
-		// run2Data();
-		//run();
-		
-		try {
-			
-			String file = StringPool.PROJECT_DIR + "/data/dxlist/dxgp.txt";
-
-			List<String> list = FileUtil.readToStringList(file, StringPool.UTF_8);
-
-			System.out.println("编号#名称#分类#标识#15天板#昨封板#连板#操作#15d成交均量#赚亏比#均线值#昨天涨跌#评分");
-			
-			for (String str : list)
-			{
-				ZhangTingDiXiVO vo = new ZhangTingDiXiVO();
-				String[] vostrs = str.split("#");
+				// runData();
+				// run2Data();
+				runZtDx();
 				
-				if(vostrs[0].equals("编号"))
-				{
-					continue;
-				}
-				
-				vo.setCid(vostrs[0]); // Code
-				vo.setName(vostrs[1]);// 名称
-				vo.setCate(vostrs[2]);// 分类
-				vo.setBsstr(vostrs[3]); //标识
-				vo.setBan15d(Integer.valueOf(vostrs[4])); //15天涨停
-				vo.setFbstr(vostrs[5]); //昨封板
-				vo.setLbstr(Integer.valueOf(vostrs[6])); // 连板
-				vo.setCzstr(vostrs[7]); // 操作
-				vo.setLiang15d(vostrs[8] + "亿");
-				vo.setZkb(Double.valueOf(vostrs[9]));
-				vo.setJxz(vostrs[10]);
-				vo.setZtzd(vostrs[11]);
-				vo.setScore(Integer.valueOf(vostrs[12]));
-				vo.setScore(score(vo));
-				
-				//开盘涨跌幅
-				GuPiaoInfoVO info = RunUtils.getGuPiaoInfo(vo.getCid());
-				
-				System.out.println(vo.toString() + "#" + info.getKpzdf());
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+//				try {
+//					
+//					String file = StringPool.PROJECT_DIR + "\\data\\dxlist\\dxgp.txt";
+		//
+//					List<String> list = FileUtil.readToStringList(file, StringPool.UTF_8);
+		//
+//					System.out.println("编号#名称#分类#标识#15天板#昨封板#连板#操作#15d成交均量#赚亏比#均线值#昨天涨跌#评分");
+//					
+//					for (String str : list)
+//					{
+//						ZhangTingDiXiVO vo = new ZhangTingDiXiVO();
+//						String[] vostrs = str.split("#");
+//						
+//						if(vostrs[0].equals("编号"))
+//						{
+//							continue;
+//						}
+//						
+//						vo.setCid(vostrs[0]); // Code
+//						vo.setName(vostrs[1]);// 名称
+//						vo.setCate(vostrs[2]);// 分类
+//						vo.setBsstr(vostrs[3]); //标识
+//						vo.setBan15d(Integer.valueOf(vostrs[4])); //15天涨停
+//						vo.setFbstr(vostrs[5]); //昨封板
+//						vo.setLbstr(Integer.valueOf(vostrs[6])); // 连板
+//						vo.setCzstr(vostrs[7]); // 操作
+//						vo.setLiang15d(vostrs[8] + "亿");
+//						vo.setCmstr(vostrs[9]);
+//						vo.setJxz(vostrs[10]);
+//						vo.setZtzd(vostrs[11]);
+//						vo.setScore(Integer.valueOf(vostrs[12]));
+//						vo.setScore(score(vo));
+//						
+//						//开盘涨跌幅
+//						GuPiaoInfoVO info = RunUtils.getGuPiaoInfo(vo.getCid());
+//						
+//						System.out.println(vo.toString() + "#" + info.getKpzdf());
+//					}
+		//
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
 	}
 	
 	private static String cids = "";
@@ -242,7 +242,7 @@ public class RunZhangTingDiXi {
 		
 		try {
 			
-			String fileurl = StringPool.PROJECT_DIR + "/data/超短低吸.xlsx";
+			String fileurl = StringPool.PROJECT_DIR + "\\data\\超短低吸.xlsx";
 
 			XSSFWorkbook xssfWorkbook = new XSSFWorkbook(new FileInputStream(fileurl));
 			//int sheets = xssfWorkbook.getNumberOfSheets();
@@ -268,15 +268,15 @@ public class RunZhangTingDiXi {
 				vo.setName(row.getCell(1).toString());// 名称
 				vo.setCate(row.getCell(2).toString());// 分类
 				vo.setBsstr(row.getCell(3).toString()); //标识
-				vo.setBan15d(Double.valueOf(row.getCell(4).toString()).intValue()); //15天涨停
-				vo.setFbstr(row.getCell(5).toString()); //昨封板
-				vo.setLbstr(Double.valueOf(row.getCell(6).toString()).intValue()); // 连板
-				vo.setCzstr(row.getCell(7).toString()); // 操作
+				vo.setLbstr(Double.valueOf(row.getCell(4).toString()).intValue()); // 连板
+				vo.setBan15d(Double.valueOf(row.getCell(5).toString()).intValue()); //15天涨停
+				vo.setFbstr(row.getCell(6).toString()); //昨封板
+				vo.setCmstr(row.getCell(7).toString());
 				vo.setLiang15d(row.getCell(8).toString() + "亿");
-				//vo.setLiang15d(row.getCell(10).toString());
-				vo.setZtzd(row.getCell(11).toString());
-				vo.setScore(Double.valueOf(row.getCell(12).toString()).intValue());
-				
+				vo.setJxz(row.getCell(9).toString());
+				vo.setZtzd(row.getCell(10).toString());
+				vo.setScore(Double.valueOf(row.getCell(11).toString()).intValue());
+				vo.setCzstr(row.getCell(12).toString()); // 操作
 				vo.setSort(j+1);
 				s_cidsBuf.append(vo.getCid()).append(",");
 				System.out.println(vo.toString());

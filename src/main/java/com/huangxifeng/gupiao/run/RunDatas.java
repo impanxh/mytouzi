@@ -2,6 +2,8 @@ package com.huangxifeng.gupiao.run;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -73,17 +75,17 @@ public class RunDatas {
 		// 涨停龙头低吸
 		RunDatas.runLongtouDixiGP(true);  //我主要做这个
 		
-		// 涨停列表
-		RunUtils.getZhangTingList();
-		
-		// 跌停列表
-		RunUtils.getDieTingList();
-		
-		//高板股票 15天5天涨停列表
-		RunDatas.runGaoBanGP();
-		
-		//行业监控票（15天5次涨停，3天1次涨停）
-		RunDatas.runHangYeJKGP();
+//		// 涨停列表
+//		RunUtils.getZhangTingList();
+//		
+//		// 跌停列表
+//		RunUtils.getDieTingList();
+//		
+//		//高板股票 15天5天涨停列表
+//		RunDatas.runGaoBanGP();
+//		
+//		//行业监控票（15天5次涨停，3天1次涨停）
+//		RunDatas.runHangYeJKGP();
 
 		// 大跌震荡行情股票
 		//runZhengdangGP();
@@ -2060,47 +2062,48 @@ public class RunDatas {
 			
 			int ztnum = 0;
 			
-			
-			
-				//3连板
-				ztnum = RunUtils.getZhangTingDays(vo.getCid(), 3);
-				if(ztnum == 3)
-				{
-					ZhangTingDiXiVO dxvo = new ZhangTingDiXiVO();
-					dxvo.setCid(vo.getCid());
-					dxvo.setName(vo.getName());
-					dxvo.setCate(vo.getCate());
-					dxvo.setBsstr("3连板");
-					dxlist.add(dxvo);
-					continue;
-				}
-				
-				//15天内5次涨停
-				int allnum = RunUtils.getZhangTingDays(vo.getCid(), 15);
-				if (allnum < 5)
-				{
-					continue;
-				}
-				
-				//5天内2次 || 3次涨停
-				ztnum = RunUtils.getZhangTingDays(vo.getCid(), 5);
-				if (ztnum < 2)
-				{
-					continue;
-				}
-				
+			//3连板
+			ztnum = RunUtils.getZhangTingDays(vo.getCid(), 3);
+			if(ztnum == 3)
+			{
 				ZhangTingDiXiVO dxvo = new ZhangTingDiXiVO();
 				dxvo.setCid(vo.getCid());
 				dxvo.setName(vo.getName());
 				dxvo.setCate(vo.getCate());
-				dxvo.setBsstr("5内" + ztnum + "板");
+				dxvo.setBsstr("3连板");
 				dxlist.add(dxvo);
+				continue;
+			}
+			
+			//15天内5次涨停
+			int allnum = RunUtils.getZhangTingDays(vo.getCid(), 15);
+			if (allnum < 5)
+			{
+				continue;
+			}
+			
+			//5天内2次 || 3次涨停
+			ztnum = RunUtils.getZhangTingDays(vo.getCid(), 5);
+			if (ztnum < 2)
+			{
+				continue;
+			}
+			
+			ZhangTingDiXiVO dxvo = new ZhangTingDiXiVO();
+			dxvo.setCid(vo.getCid());
+			dxvo.setName(vo.getName());
+			dxvo.setCate(vo.getCate());
+			dxvo.setBsstr("5内" + ztnum + "板");
+			dxlist.add(dxvo);
 		}
 		
 		try {
 			
-			StringBuffer strbuf = new StringBuffer("编号#名称#分类#标识#15天板#昨封板#连板#操作#15d成交均量#赚亏比#均线值#昨天涨跌#评分\n");
-			System.out.println("编号#名称#分类#标识#15天板#昨封板#连板#操作#15d成交均量#赚亏比#均线值#昨天涨跌#评分");
+			List<ZhangTingDiXiVO> newlist = new ArrayList<ZhangTingDiXiVO>();
+			
+
+			StringBuffer strbuf = new StringBuffer("编号#名称#分类#标识#连板#15天板#昨封板#筹码#15d均量#均线值#昨天涨跌#评分#操作\n");
+			System.out.println("编号#名称#分类#标识#连板#15天板#昨封板#筹码#15d均量#均线值#昨天涨跌#评分#操作");
 			
 			for (int i = 0; i < dxlist.size(); i++)
 			{
@@ -2152,6 +2155,11 @@ public class RunDatas {
 						dxvo.setLbstr(ztnum);
 					}
 					
+					if(ztnum > 3)
+					{
+						dxvo.setBsstr(ztnum + "板");
+					}
+					
 					break;
 				}
 				
@@ -2187,7 +2195,19 @@ public class RunDatas {
 				}
 				
 				dxvo.setScore(RunZhangTingDiXi.score(dxvo));
-				
+				newlist.add(dxvo);
+			}
+			
+			Collections.sort(newlist, new Comparator<ZhangTingDiXiVO>() {
+				@Override
+				public int compare(ZhangTingDiXiVO o1, ZhangTingDiXiVO o2) {
+					return o2.getScore() - o1.getScore();
+				}
+			});
+			
+			for (int i = 0; i < newlist.size(); i++)
+			{
+				ZhangTingDiXiVO dxvo = newlist.get(i);
 				System.out.println(dxvo.toString());
 				strbuf.append(dxvo.toString()).append("\n");
 			}

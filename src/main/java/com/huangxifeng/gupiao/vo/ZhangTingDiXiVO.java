@@ -21,6 +21,8 @@ public class ZhangTingDiXiVO extends GuPiaoCiXinVO
 	String jxz      = "";  // 均线值说明
 	String ztzd     = "";  // 昨天的涨跌
 	
+	String cmstr    = "";  //筹码情况
+	
 	String hyid = ""; // 行业涨跌
 	Double hyzd = 0.0; // 行业涨跌
 	Double hyzb = 0.0;   // 行业个股涨比
@@ -31,8 +33,8 @@ public class ZhangTingDiXiVO extends GuPiaoCiXinVO
 	@Override
 	public String toString()
 	{
-		//"编号#名称#分类#标识#15天板#昨封板#连板#操作#15d成交均量#赚亏比"
-		return cid + "#" + name + "#" + cate + "#" + bsstr + "#" + ban15d + "#" + fbstr + "#" + lbstr + "#" + czstr + "#" + liang15d + "#" + zkb + "#" + jxz+ "#" + ztzd + "#" + score;
+		//"编号#名称#分类#标识#15天板#昨封板#连板#操作#15d成交均量#筹码"
+		return cid + "#" + name + "#" + cate + "#" + bsstr + "#" + ban15d + "#" + fbstr + "#" + lbstr + "#" + czstr + "#" + liang15d + "#" + cmstr + "#" + jxz+ "#" + ztzd + "#" + score;
 	}
 	
 	public String getLiang15d() {
@@ -182,6 +184,14 @@ public class ZhangTingDiXiVO extends GuPiaoCiXinVO
 
 	public void setDt10d(int dt10d) {
 		this.dt10d = dt10d;
+	}
+
+	public String getCmstr() {
+		return cmstr;
+	}
+
+	public void setCmstr(String cmstr) {
+		this.cmstr = cmstr;
 	}
 	
 }
