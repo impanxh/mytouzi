@@ -48,18 +48,28 @@
             var url = 'http://q.10jqka.com.cn/thshy/detail/code/' + row['hyid'] + '/';
             var c = '&nbsp;<a class="table-link" target="_blank" onclick="signIn(\'' + url + '\');"> ' + info + ' ' + f + '</a>';
             return c;
-        } }, { "data": "bsstr" }, { "data": "zdf", "render": function render(data, type, row, meta) {
+        } }, { "data": "bsstr" },  { "data": "lbstr", "render": function render(data, type, row, meta) {
+            return row.lbstr + "|" + row.ban15d;
+        } }, { "data": "fbstr" }, { "data": "cmstr" },
+        
+        
+         { "data": "zdf", "render": function render(data, type, row, meta) {
             data = parseFloat(data);
             return data > 0 ? " <span class='bold red'>" + data + "%</span> " : data == 0 ? "0%" : " <span class='bold green'>" + data + "%</span>  ";
-        } }, { "data": "fbstr" }, { "data": "lbstr", "render": function render(data, type, row, meta) {
-            return row.lbstr + "|" + row.ban15d;
-        } }, { "data": "kpzdb", "render": function render(data, type, row, meta) {
-            return data > 0 ? " <span class='bold red'>" + data + "%</span> " : data == 0 ? "0%" : " <span class='bold green'>" + data + "%</span>  ";
-        } }, { "data": "czstr" }, { "data": "zkb", "render": function render(data, type, row, meta) {
-            return data > 0 ? " <span class='bold red'>" + data + "%</span> " : data == 0 ? "0%" : " <span class='bold green'>" + data + "%</span>  ";
-        } }, { "data": "liang15d" }, { "data": "ztzd", "render": function render(data, type, row, meta) {
-            return data == "昨涨" ? " <span class='bold red'>" + data + "</span> " : data;
-        } }, { "data": "score" }];
+        } },
+        
+        
+        { "data": "kpzdb", "render": function render(data, type, row, meta) {
+            return data > 0 ? " <span class='bold red'>" + data + "%</span> " : data == 0 ? "-" : " <span class='bold green'>" + data + "%</span>  ";
+        } }, { "data": "zkb", "render": function render(data, type, row, meta) {
+            return data > 0 ? " <span class='bold red'>" + data + "%</span> " : data == 0 ? "-" : " <span class='bold green'>" + data + "%</span>  ";
+        } },
+       //  { "data": "liang15d" },
+       //   { "data": "ztzd", "render": function render(data, type, row, meta) {
+        //    return data == "昨涨" ? " <span class='bold red'>" + data + "</span> " : data;
+       // } },
+        
+         { "data": "score" }, { "data": "czstr" }];
 
     var ajaxCallback = function ajaxCallback(json) {
         json.recordsTotal = json.length;
@@ -79,6 +89,12 @@
         };
     }).withAutoScrollY().withColumns(coluns).withExcelExport(true).withCountTd(false).withEnableSort(true); // is excelport
     ta.dom = '<"#toolbar">Bfrt';
+   	ta.withCreatedRow(function (row, data, index) {
+        if (data.kpzdb < 0) {
+            $('td', row).css('background-color', '#FFFFCC');
+        }
+    })
+    
     ta.withInitComplete(function () {
         //set initcomplete
         $('#kpi_s,#type_s1').change(function () {
@@ -168,11 +184,11 @@
         $('#g43').addClass(vo.gbjkvo.jk_jzf > 2.5 ? "red" : "green");
 
         //3.2
-        $('#g0').addClass(vo.gbjkvo.jk_sszdb >= 60 ? "red" : "green");
+        $('#g0').addClass(vo.gbjkvo.jk_sszdb >= vo.gbjkvo.jk_gkb ? "red" : "green");
 
         $('#g1').html("[" + (vo.gbjkvo.jk_sszdb - vo.gbjkvo.jk_gkb).toFixed(2) + "%]");
         $('#g2').html(vo.gbjkvo.jk_sszdb + "%");
-        $('#g2').addClass(vo.gbjkvo.jk_sszdb >= 60 ? "red" : "green");
+        $('#g2').addClass(vo.gbjkvo.jk_sszdb >= 65 ? "red" : "green");
 
         $('#g3').html("[" + (vo.gbjkvo.jk_ssjzf - vo.gbjkvo.jk_jzf).toFixed(2) + "%]");
 

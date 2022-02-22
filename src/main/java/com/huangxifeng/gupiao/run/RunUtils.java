@@ -1128,13 +1128,16 @@ public class RunUtils {
 		}
 
 		List<GuPiaoBaseVO> list = getAllGpVoList();
-
+		int count = 0;
 		for (int i = 0; i < list.size(); i++) {
 			GuPiaoBaseVO vo = list.get(i);
 			// if(vo.isOK())
 			{
 				try {
-					System.out.println(vo.toString());
+					if( (count++) % 300 == 0) {
+						System.out.println(vo.toString());
+					}
+					
 					getGpDayBody(vo.getCid());
 				} catch (Exception e) {
 					e.printStackTrace();
