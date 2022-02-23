@@ -90,7 +90,7 @@ public class RunUtils {
 				
 		//downloadMonthFile();
 
-		//get1YiList(true);
+		get1YiList(true);
 		// getSuoLiangList(true);
 
 		// getNewList(true);

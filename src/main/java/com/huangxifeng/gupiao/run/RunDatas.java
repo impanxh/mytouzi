@@ -2061,11 +2061,9 @@ public class RunDatas {
 				continue;
 			}
 			
-			int ztnum = 0;
-			
 			//3连板
-			ztnum = RunUtils.getZhangTingDays(vo.getCid(), 3);
-			if(ztnum == 3)
+			int d3ztnum = RunUtils.getZhangTingDays(vo.getCid(), 3);
+			if(d3ztnum == 3)
 			{
 				ZhangTingDiXiVO dxvo = new ZhangTingDiXiVO();
 				dxvo.setCid(vo.getCid());
@@ -2077,15 +2075,15 @@ public class RunDatas {
 			}
 			
 			//15天内5次涨停
-			int allnum = RunUtils.getZhangTingDays(vo.getCid(), 15);
-			if (allnum < 5)
+			int d15ztnum = RunUtils.getZhangTingDays(vo.getCid(), 15);
+			if (d15ztnum < 5)
 			{
 				continue;
 			}
 			
-			//5天内2次 || 3次涨停
-			ztnum = RunUtils.getZhangTingDays(vo.getCid(), 5);
-			if (ztnum < 2)
+			//5天内2次 
+			int d5ztnum = RunUtils.getZhangTingDays(vo.getCid(), 5);
+			if (d5ztnum < 2)
 			{
 				continue;
 			}
@@ -2094,14 +2092,13 @@ public class RunDatas {
 			dxvo.setCid(vo.getCid());
 			dxvo.setName(vo.getName());
 			dxvo.setCate(vo.getCate());
-			dxvo.setBsstr("5内" + ztnum + "板");
+			dxvo.setBsstr("5内" + d5ztnum + "板");
 			dxlist.add(dxvo);
 		}
 		
 		try {
 			
 			List<ZhangTingDiXiVO> newlist = new ArrayList<ZhangTingDiXiVO>();
-			
 
 			StringBuffer strbuf = new StringBuffer("编号#名称#分类#标识#连板#15天板#昨封板#筹码#15d均量#均线值#昨天涨跌#评分#操作\n");
 			System.out.println("编号#名称#分类#标识#连板#15天板#昨封板#筹码#15d均量#均线值#昨天涨跌#评分#操作");
@@ -2134,31 +2131,33 @@ public class RunDatas {
 				}
 				
 				//15天平均交易量
-				Double liang15d = RunUtils.getDayLiangAve(dxvo.getCid(), 15);
+				Double liang15d = RunUtils.getDayLiangAve(dxvo.getCid(), 12);
 				dxvo.setLiang15d(liang15d.toString());
 				
-				int allnum = RunUtils.getZhangTingDays(dxvo.getCid(), 15);
-				dxvo.setBan15d(allnum);
+				//15天板
+				int d15ztnum = RunUtils.getZhangTingDays(dxvo.getCid(), 15);
+				dxvo.setBan15d(d15ztnum);
 				
-				int dtnum = RunUtils.getDieTingDays(dxvo.getCid(), 10);
-				dxvo.setDt10d(dtnum);
+				//10天跌停
+				int d10dtnum = RunUtils.getDieTingDays(dxvo.getCid(), 10);
+				dxvo.setDt10d(d10dtnum);
 				
 				for (int j = 1; j <= 15; j++)
 				{
-					int ztnum = RunUtils.getZhangTingDays(dxvo.getCid(), j);
-					if(ztnum == j)
+					int lbnum = RunUtils.getZhangTingDays(dxvo.getCid(), j);
+					if(lbnum == j)
 					{
 						continue;
 					}
 					
-					if(ztnum > 0)
+					if(lbnum > 0)
 					{
-						dxvo.setLbstr(ztnum);
+						dxvo.setLbstr(lbnum);
 					}
 					
-					if(ztnum > 3)
+					if(lbnum > 3)
 					{
-						dxvo.setBsstr(ztnum + "板");
+						dxvo.setBsstr(lbnum + "板");
 					}
 					
 					break;
@@ -2202,7 +2201,12 @@ public class RunDatas {
 			Collections.sort(newlist, new Comparator<ZhangTingDiXiVO>() {
 				@Override
 				public int compare(ZhangTingDiXiVO o1, ZhangTingDiXiVO o2) {
-					return o2.getScore() - o1.getScore();
+					if(o2.getScore() - o1.getScore() == 0 )
+					{
+						return o2.getLiang15d().compareTo(o1.getLiang15d());
+					} else {
+						return o2.getScore() - o1.getScore();
+					}
 				}
 			});
 			

@@ -97,7 +97,7 @@ public class RunZhangTingDiXi {
 		int lbfen = vo.getLbstr() * 6; 
 		int d5fen = 0;
 		int d15fen = 0;
-		int dt15fen = 0;
+		int dt10fen = 0;
 		int jx5fen = 0;
 		int zzfen = 0;
 		
@@ -121,10 +121,7 @@ public class RunZhangTingDiXi {
 			sf.append("15天内除连板  x 3：" + ((vo.getBan15d() - vo.getLbstr()) * 3) + "分。");
 		}
 		
-		int dtnum = RunUtils.getDieTingDays(vo.getCid(), 10);
-		vo.setDt10d(dtnum);
-		
-		dt15fen = vo.getDt10d() * 4;
+		dt10fen = vo.getDt10d() * 4;
 		if(vo.getDt10d() > 0)
 		{
 			sf.append("跌停-4：-" + (vo.getDt10d() * 4) + "分。");
@@ -142,7 +139,25 @@ public class RunZhangTingDiXi {
 			sf.append("昨涨 + 2：" + 2 + "分。");
 		}
 		
-		score = lbfen + d5fen + d15fen - dt15fen + jx5fen + zzfen;
+		score = lbfen + d5fen + d15fen - dt10fen + jx5fen + zzfen;
+		
+		//封板资金大于1亿加分项
+		if(vo.getFbstr().contains("亿"))
+		{
+			Double fbzj = Double.valueOf(vo.getFbstr().split("亿")[0]);
+			if(fbzj.compareTo(5.0) > 0)
+			{
+				score += 4;
+			}
+			else if (fbzj.compareTo(3.0) > 0)
+			{
+				score += 3;
+			}
+			else if (fbzj.compareTo(1.0) > 0)
+			{
+				score += 2;
+			}
+		}
 		
 		sf.append("总分：" + score);
 		
