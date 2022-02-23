@@ -10,6 +10,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import com.huangxifeng.core.config.Config;
 import com.huangxifeng.core.utils.DoubleUtil;
 import com.huangxifeng.core.utils.HttpClientUtil;
 import com.huangxifeng.core.utils.StringPool;
@@ -68,7 +69,7 @@ public class RunZhuiZhangTing {
 		
 		try {
 			
-			String fileurl = StringPool.PROJECT_DIR + "\\data\\涨停列表.xlsx";
+			String fileurl = Config.DATA_DIR + "\\data\\涨停列表.xlsx";
 
 			XSSFWorkbook xssfWorkbook = new XSSFWorkbook(new FileInputStream(fileurl));
 			//int sheets = xssfWorkbook.getNumberOfSheets();

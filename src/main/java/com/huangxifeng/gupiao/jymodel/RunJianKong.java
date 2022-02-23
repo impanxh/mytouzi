@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.huangxifeng.core.config.Config;
 import com.huangxifeng.core.utils.DoubleUtil;
 import com.huangxifeng.core.utils.FileUtil;
 import com.huangxifeng.core.utils.HttpClientUtil;
@@ -99,7 +100,7 @@ public class RunJianKong
 		try {
 			
 			//跌停列表
-			String dtfileurl = StringPool.PROJECT_DIR + "/data/run/dtgp.txt";
+			String dtfileurl = Config.DATA_DIR + "/data/run/dtgp.txt";
 			List<String> list = FileUtil.readToStringList(dtfileurl, StringPool.UTF_8);
 			System.out.println("=========== 读取跌停列表  ===========");
 			for (int i = 0; i < list.size(); i++)
@@ -119,7 +120,7 @@ public class RunJianKong
 			System.out.println("一共读取 " + list.size() + " 条数据");
 			
 			//涨停列表
-			String ztfileurl = StringPool.PROJECT_DIR + "/data/run/ztgp.txt";
+			String ztfileurl = Config.DATA_DIR + "/data/run/ztgp.txt";
 			list = FileUtil.readToStringList(ztfileurl, StringPool.UTF_8);
 			System.out.println("=========== 读取涨停列表  ===========");
 			for (int i = 0; i < list.size(); i++)
@@ -139,7 +140,7 @@ public class RunJianKong
 			System.out.println("一共读取 " + list.size() + " 条数据");
 			
 			//高标列表
-			String gbfileurl = StringPool.PROJECT_DIR + "/data/run/gbgp.txt";
+			String gbfileurl = Config.DATA_DIR + "/data/run/gbgp.txt";
 			list = FileUtil.readToStringList(gbfileurl, StringPool.UTF_8);
 			System.out.println("=========== 读取高标列表  ===========");
 			for (int i = 0; i < list.size(); i++)
@@ -159,7 +160,7 @@ public class RunJianKong
 			System.out.println("一共读取 " + list.size() + " 条数据");
 			
 			//行业列表
-			String hyfileurl = StringPool.PROJECT_DIR + "/data/run/hygp.txt";
+			String hyfileurl = Config.DATA_DIR + "/data/run/hygp.txt";
 			list = FileUtil.readToStringList(hyfileurl, StringPool.UTF_8);
 			System.out.println("=========== 读取行业列表  ===========");
 			for (int i = 0; i < list.size(); i++)

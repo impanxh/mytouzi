@@ -9,6 +9,7 @@
     <style type="text/css">
         body{
             background-color: #DDDDDD;
+            color:#333333;
         }
         table {
             border: 1px solid black;
@@ -24,7 +25,16 @@
         }
 
 		h3{font-size:22px;}
-
+		a{
+			color:#0000FF;
+			text-decoration: underline;
+		}
+		a:hover
+		{
+			font-weight:bold;
+			text-decoration: none;
+			cursor: pointer;
+		}
         .bold{font-weight: bold}
         .green{color:#00d20d}
         .red{color:#ff0000}
@@ -84,10 +94,10 @@ setInterval (function() {
 
 <table>
     <tr style="border: 2px solid black; background-color: #CCC">
-        <td style="background-color: #ff0000"><a href="/gp/run?p=ztdx" target="_blank">启动自选监控</a></td>
-        <td style="background-color: #ff0000"><a href="/gp/run?p=all" target="_blank">启动全部个股监控</a></td>
-        <td style="background-color: #ff0000"><a href="/gp/run?p=hy" target="_blank">启动行业监控</a></td>
-        <td style="background-color: #ff0000"><a href="/gp/opt?key=all" target="_blank">停止跑数据</a></td>
+        <td style="background-color: #FF9999"><a href="/gp/run?p=ztdx" target="_blank">启动自选监控</a></td>
+        <td style="background-color: #FF9999"><a href="/gp/run?p=all" target="_blank">启动全部个股监控</a></td>
+        <td style="background-color: #FF9999"><a href="/gp/run?p=hy" target="_blank">启动行业监控</a></td>
+        <td style="background-color: #FF9999"><a href="/gp/opt?key=all" target="_blank">停止跑数据</a></td>
         <td style="background-color: #93D1FF"><a th:href="${'/gp/ztdx?px=' + px + '&hpx=zdf'}">行业涨跌幅</a></td>
         <td style="background-color: #93D1FF"><a th:href="${'/gp/ztdx?px=' + px + '&hpx=lr'}">行业静流入</a></td>
         <td style="background-color: #93D1FF"><a th:href="${'/gp/ztdx?px=' + px + '&hpx=zdb'}">行业涨跌比</a></td>

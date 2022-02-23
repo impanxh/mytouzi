@@ -8,9 +8,6 @@ package com.huangxifeng.core.utils;
  * @author JWinder.Huang (Jun 20, 2012)
  */
 public class StringPool {
-	//public static final String PROJECT_DIR = "/opt/tomcat_gpz/"  ;
-	
-	public static final String PROJECT_DIR =  "/Users/xinghuapan/Documents/gupiaodata"; 
 
 	public static final String AMPERSAND = "&";
 

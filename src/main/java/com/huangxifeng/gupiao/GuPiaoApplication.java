@@ -13,12 +13,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @EnableGroovy
 @SpringBootApplication
-public class GuPiaoApplication extends SpringBootServletInitializer implements WebMvcConfigurer{
+public class GuPiaoApplication extends SpringBootServletInitializer implements WebMvcConfigurer {
+	
 	@Override
-	    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
-	          // 注意这里要指向原先用main方法执行的App启动类
-	         return builder.sources(GuPiaoApplication.class);
-	     }
+    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+          // 注意这里要指向原先用main方法执行的App启动类
+         return builder.sources(GuPiaoApplication.class);
+     }
+	
 	/**
 	 * 默认时区（亚洲/上海）
 	 */

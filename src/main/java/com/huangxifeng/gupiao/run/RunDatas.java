@@ -7,6 +7,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
+import com.huangxifeng.core.config.Config;
 import com.huangxifeng.core.utils.DateUtil;
 import com.huangxifeng.core.utils.DoubleUtil;
 import com.huangxifeng.core.utils.FileUtil;
@@ -104,7 +105,7 @@ public class RunDatas {
 
 			int num = 0;
 
-			String file = StringPool.PROJECT_DIR + "/data/1yilist/all.txt";
+			String file = Config.DATA_DIR + "/data/1yilist/all.txt";
 			List<GuPiaoBaseVO> list = RunUtils.getGpList(file);
 
 			for (int i = 0; i < list.size(); i++) {
@@ -290,9 +291,9 @@ public class RunDatas {
 
 			int num = 0;
 
-			// String file = StringPool.PROJECT_DIR + "\\data\\zz500.txt";
-			String file = StringPool.PROJECT_DIR + "/data/1yilist/all.txt";
-			// String file = StringPool.PROJECT_DIR + "\\data\\hygp.txt";
+			// String file = Config.DATA_DIR + "\\data\\zz500.txt";
+			String file = Config.DATA_DIR + "/data/1yilist/all.txt";
+			// String file = Config.DATA_DIR + "\\data\\hygp.txt";
 			List<GuPiaoBaseVO> list = RunUtils.getGpList(file);
 
 			for (int i = 0; i < list.size(); i++) {
@@ -489,9 +490,9 @@ public class RunDatas {
 
 			int num = 0;
 
-			String file = StringPool.PROJECT_DIR + "/data/catelist/" + cate;
+			String file = Config.DATA_DIR + "/data/catelist/" + cate;
 			if (cate.startsWith("30")) {
-				file = StringPool.PROJECT_DIR + "/data/gnlist/" + cate;
+				file = Config.DATA_DIR + "/data/gnlist/" + cate;
 			}
 
 			List<GuPiaoBaseVO> list = RunUtils.getGpList(file);
@@ -600,7 +601,7 @@ public class RunDatas {
 				num++;
 			}
 
-			FileUtil.writeFile(StringPool.PROJECT_DIR + "/data/hygp.txt", buf.toString(), StringPool.UTF_8);
+			FileUtil.writeFile(Config.DATA_DIR + "/data/hygp.txt", buf.toString(), StringPool.UTF_8);
 
 			System.out.println("一共：" + num + "条数据");
 		} catch (Exception e) {
@@ -619,8 +620,8 @@ public class RunDatas {
 
 		int num = 0;
 
-		// String file = StringPool.PROJECT_DIR + "\\data/1yilist/all.txt";
-		String file = StringPool.PROJECT_DIR + "/data/hygp.txt";
+		// String file = Config.DATA_DIR + "\\data/1yilist/all.txt";
+		String file = Config.DATA_DIR + "/data/hygp.txt";
 
 		List<GuPiaoBaseVO> list = RunUtils.getGpList(file);
 
@@ -1148,7 +1149,7 @@ public class RunDatas {
 	}
 
 	public static void zhangdiefu() {
-		String yyfile = StringPool.PROJECT_DIR + "/data/1yilist/yjbz.txt";
+		String yyfile = Config.DATA_DIR + "/data/1yilist/yjbz.txt";
 		List<String> yistrlist = FileUtil.readToStringList(yyfile, "UTF-8");
 		List<ZhangDieBiVO> yilist = new ArrayList<ZhangDieBiVO>();
 		for (String yistr : yistrlist) {
@@ -1763,7 +1764,7 @@ public class RunDatas {
 
 			int num = 0;
 
-			String file = StringPool.PROJECT_DIR + "/data/1yilist/all.txt";
+			String file = Config.DATA_DIR + "/data/1yilist/all.txt";
 			List<GuPiaoBaseVO> list = RunUtils.getGpList(file);
 
 			for (int i = 0; i < list.size(); i++) {
@@ -2029,8 +2030,8 @@ public class RunDatas {
 	public static void runLongtouDixiGP(boolean flag)
 	{
 		String date = DateUtil.format(new Date(), DateUtil.YYYYMMDD);
-		String dxgpfile = StringPool.PROJECT_DIR + "/data/dxlist/dxgp-" + date + ".txt";
-		String dxdayfile = StringPool.PROJECT_DIR + "/data/run/dxgp.txt";
+		String dxgpfile = Config.DATA_DIR + "/data/dxlist/dxgp-" + date + ".txt";
+		String dxdayfile = Config.DATA_DIR + "/data/run/dxgp.txt";
 
 		try {
 
@@ -2228,8 +2229,8 @@ public class RunDatas {
 	public static void runGaoBanGP()
 	{
 		String date = DateUtil.format(new Date(), DateUtil.YYYYMMDD);
-		String gbgpfile = StringPool.PROJECT_DIR + "/data/jklist/gbgp-" + date + ".txt";
-		String gbdayfile = StringPool.PROJECT_DIR + "/data/run/gbgp.txt";
+		String gbgpfile = Config.DATA_DIR + "/data/jklist/gbgp-" + date + ".txt";
+		String gbdayfile = Config.DATA_DIR + "/data/run/gbgp.txt";
 
 		try {
 
@@ -2314,8 +2315,8 @@ public class RunDatas {
 	public static void runHangYeJKGP()
 	{
 		String date = DateUtil.format(new Date(), DateUtil.YYYYMMDD);
-		String hygpfile = StringPool.PROJECT_DIR + "/data/jklist/hygp-" + date + ".txt";
-		String hydayfile = StringPool.PROJECT_DIR + "/data/run/hygp.txt";
+		String hygpfile = Config.DATA_DIR + "/data/jklist/hygp-" + date + ".txt";
+		String hydayfile = Config.DATA_DIR + "/data/run/hygp.txt";
 
 		try {
 

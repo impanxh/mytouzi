@@ -17,6 +17,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import com.huangxifeng.core.config.Config;
 import com.huangxifeng.core.utils.DoubleUtil;
 import com.huangxifeng.core.utils.FileUtil;
 import com.huangxifeng.core.utils.HttpClientUtil;
@@ -196,7 +197,7 @@ public class RunIndustryMonitorSpider {
 	public static void initHangYe()
 	{
 		
-		String filename = StringPool.PROJECT_DIR + "/data/cate.txt";
+		String filename = Config.DATA_DIR + "/data/cate.txt";
 		List<String> strlist = FileUtil.readToStringList(filename, StringPool.UTF_8);
 		for (String hy : strlist)
 		{

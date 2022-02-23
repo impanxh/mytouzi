@@ -15,6 +15,7 @@ import org.jsoup.select.Elements;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.huangxifeng.core.config.Config;
 import com.huangxifeng.core.utils.DateUtil;
 import com.huangxifeng.core.utils.DoubleUtil;
 import com.huangxifeng.core.utils.FileUtil;
@@ -182,8 +183,8 @@ public class RunUtils {
 	// 获取指定日涨停股票
 	public static List<String> getZhangTingList(String date) {
 
-		String ztgpfile = StringPool.PROJECT_DIR + "/data/ztlist/ztgp-" + date + ".txt";
-		String ztdayfile = StringPool.PROJECT_DIR + "/data/run/ztgp.txt";
+		String ztgpfile = Config.DATA_DIR + "/data/ztlist/ztgp-" + date + ".txt";
+		String ztdayfile = Config.DATA_DIR + "/data/run/ztgp.txt";
 
 		try {
 
@@ -397,8 +398,8 @@ public class RunUtils {
 	public static List<String> getDieTingList(String date)
 	{
 
-		String dtgpfile = StringPool.PROJECT_DIR + "/data/dtlist/dtgp-" + date + ".txt";
-		String dtdayfile = StringPool.PROJECT_DIR + "/data/run/dtgp.txt";
+		String dtgpfile = Config.DATA_DIR + "/data/dtlist/dtgp-" + date + ".txt";
+		String dtdayfile = Config.DATA_DIR + "/data/run/dtgp.txt";
 
 		try {
 
@@ -544,7 +545,7 @@ public class RunUtils {
 		List<GuPiaoCiXinVO> list = new ArrayList<GuPiaoCiXinVO>();
 
 		// 次新股票
-		String cxgpfile = StringPool.PROJECT_DIR + "/data/cxgp.txt";
+		String cxgpfile = Config.DATA_DIR + "/data/cxgp.txt";
 		if (!isnew && FileUtil.isExist(cxgpfile)) {
 			List<String> rdcxStrs = FileUtil.readToStringList(cxgpfile, StringPool.UTF_8);
 			for (int i = 1; i < rdcxStrs.size(); i++) {
@@ -801,7 +802,7 @@ public class RunUtils {
 	// {
 	//
 	// //1亿文件是否是存在，是不需要操作
-	// String yyfile = StringPool.PROJECT_DIR + "\\data\\1yilist\\all.txt";
+	// String yyfile = Config.DATA_DIR + "\\data\\1yilist\\all.txt";
 	// if (FileUtil.isExist(yyfile))
 	// {
 	//
@@ -932,7 +933,7 @@ public class RunUtils {
 	public static List<GuPiaoBaseVO> get1YiList(boolean flag)
 	{
 		// 1亿文件是否是存在，是不需要操作
-		String yyfile = StringPool.PROJECT_DIR + "/data/1yilist/all.txt";
+		String yyfile = Config.DATA_DIR + "/data/1yilist/all.txt";
 		if (FileUtil.isExist(yyfile))
 		{
 
@@ -1010,7 +1011,7 @@ public class RunUtils {
 	// 获取所有股票里68天内涨停1次，最近7天缩量
 	public static List<GuPiaoBaseVO> getSuoLiangList(boolean flag) {
 
-		String liangfile = StringPool.PROJECT_DIR + "/data/lianglist/all.txt";
+		String liangfile = Config.DATA_DIR + "/data/lianglist/all.txt";
 		if (FileUtil.isExist(liangfile)) {
 
 			try {
@@ -1118,7 +1119,7 @@ public class RunUtils {
 
 	// 下载天文件
 	public static void downloadDayFile() {
-		String cidfile = StringPool.PROJECT_DIR + "/data/daylist/";
+		String cidfile = Config.DATA_DIR + "/data/daylist/";
 		if (FileUtil.isExist(cidfile)) {
 			try {
 				FileUtil.removeFile(cidfile, false);
@@ -1148,7 +1149,7 @@ public class RunUtils {
 
 	// 下载月文件
 	public static void downloadMonthFile() {
-		String cidfile = StringPool.PROJECT_DIR + "/data/monthlist/";
+		String cidfile = Config.DATA_DIR + "/data/monthlist/";
 		if (FileUtil.isExist(cidfile)) {
 			try {
 				FileUtil.removeFile(cidfile, false);
@@ -1484,7 +1485,7 @@ public class RunUtils {
 	public static String getGpDayBody(String cid) throws Exception {
 
 		// 读取日交易数据
-		String cidfile = StringPool.PROJECT_DIR + "/data/daylist/" + cid + ".txt";
+		String cidfile = Config.DATA_DIR + "/data/daylist/" + cid + ".txt";
 		// System.out.println(cidfile);
 		if (FileUtil.isExist(cidfile)) {
 			return FileUtil.readLine(cidfile, "UTF-8");
@@ -1501,7 +1502,7 @@ public class RunUtils {
 
 	// 生成月文件
 	public static String getGpMonthBody(String cid) throws Exception {
-		String cidfile = StringPool.PROJECT_DIR + "/data/monthlist/" + cid + ".txt";
+		String cidfile = Config.DATA_DIR + "/data/monthlist/" + cid + ".txt";
 		// System.out.println(cidfile);
 		if (FileUtil.isExist(cidfile)) {
 			return FileUtil.readLine(cidfile, "UTF-8");
@@ -1523,7 +1524,7 @@ public class RunUtils {
 
 			if (null == cateMap || cateMap.isEmpty())
 			{
-				List<String> gpcatelist = FileUtil.readToStringList(StringPool.PROJECT_DIR + "/data/gpcate.txt", StringPool.UTF_8);
+				List<String> gpcatelist = FileUtil.readToStringList(Config.DATA_DIR + "/data/gpcate.txt", StringPool.UTF_8);
 				for (String catestr : gpcatelist)
 				{
 					if (ValidateUtil.isNull(catestr))
@@ -1923,16 +1924,16 @@ public class RunUtils {
 	}
 
 	static List<String> getAllGpStr() {
-		return FileUtil.readToStringList(StringPool.PROJECT_DIR + "/data/allgp.txt", StringPool.UTF_8);
+		return FileUtil.readToStringList(Config.DATA_DIR + "/data/allgp.txt", StringPool.UTF_8);
 	}
 
 	public static List<GuPiaoBaseVO> getAllGpVoList() {
 		List<GuPiaoBaseVO> volist = new ArrayList<GuPiaoBaseVO>();
 
-		List<String> gplist = FileUtil.readToStringList(StringPool.PROJECT_DIR + "/data/allgp.txt", StringPool.UTF_8);
+		List<String> gplist = FileUtil.readToStringList(Config.DATA_DIR + "/data/allgp.txt", StringPool.UTF_8);
 
 		// List<String> gpcatelist =
-		// FileUtil.readToStringList(StringPool.PROJECT_DIR +
+		// FileUtil.readToStringList(Config.DATA_DIR +
 		// "\\data\\gpcate.txt", StringPool.UTF_8);
 
 		// Map<String, String> catemap = new HashMap<String, String>();
@@ -1962,7 +1963,7 @@ public class RunUtils {
 	public static void buildAllGPCateFile() {
 		try {
 
-			List<String> allcate = FileUtil.readToStringList(StringPool.PROJECT_DIR + "/data/cate.txt", StringPool.UTF_8);
+			List<String> allcate = FileUtil.readToStringList(Config.DATA_DIR + "/data/cate.txt", StringPool.UTF_8);
 			System.out.println(allcate.size());
 
 			// 所有分类
@@ -1972,7 +1973,7 @@ public class RunUtils {
 			// HangYeVO vo = new HangYeVO();
 			// vo.valueOf(cate);
 			//
-			// String file = StringPool.PROJECT_DIR + "\\data\\catelist\\" +
+			// String file = Config.DATA_DIR + "\\data\\catelist\\" +
 			// vo.getCid() + "-" + vo.getCname() + ".txt";
 			// List<String> gpcatelist = FileUtil.readToStringList(file,
 			// StringPool.UTF_8);
@@ -2000,7 +2001,7 @@ public class RunUtils {
 
 			if(cmap.isEmpty())
 			{
-				List<String> allcate = FileUtil.readToStringList(StringPool.PROJECT_DIR + "/data/cate.txt", StringPool.UTF_8);
+				List<String> allcate = FileUtil.readToStringList(Config.DATA_DIR + "/data/cate.txt", StringPool.UTF_8);
 				System.out.println(allcate.size());
 				// 所有分类
 				for (int i = 0 ; i < allcate.size(); i++)
@@ -2100,7 +2101,7 @@ public class RunUtils {
 				buf.append(cmap.get(key)).append("\n");
 			}
 
-			String file = StringPool.PROJECT_DIR + "/data/" + flist + "/" + cid + "-" + cname + ".txt";
+			String file = Config.DATA_DIR + "/data/" + flist + "/" + cid + "-" + cname + ".txt";
 			System.out.println(cate + "所以采集成功 及 结果 共计：【" + cmap.keySet().size() + "】条");
 			if (FileUtil.isExist(file)) {
 				// System.out.println("del" + cate);
@@ -2119,7 +2120,7 @@ public class RunUtils {
 	}
 
 	public static void mergeAllGP() {
-		String filedir = StringPool.PROJECT_DIR + "/data/catelist/";
+		String filedir = Config.DATA_DIR + "/data/catelist/";
 		if (!FileUtil.isExist(filedir)) {
 			return;
 		}
@@ -2136,7 +2137,7 @@ public class RunUtils {
 			buf.append(rfstr);
 		}
 
-		String gpcatefile = StringPool.PROJECT_DIR + "/data/gpcate.txt";
+		String gpcatefile = Config.DATA_DIR + "/data/gpcate.txt";
 
 		try {
 			FileUtil.removeFile(gpcatefile, true);
@@ -2170,7 +2171,7 @@ public class RunUtils {
 	}
 
 	public static void buildZZ500() {
-		String yyfile = StringPool.PROJECT_DIR + "/data/zz500.txt";
+		String yyfile = Config.DATA_DIR + "/data/zz500.txt";
 
 		List<GuPiaoBaseVO> yilist = new ArrayList<GuPiaoBaseVO>();
 		List<String> yistrlist = FileUtil.readToStringList(yyfile, "UTF-8");
@@ -2230,7 +2231,7 @@ public class RunUtils {
 				buf.append(gp).append("\n");
 			}
 
-			FileUtil.writeFile(StringPool.PROJECT_DIR + "/data/allgp.txt", buf.toString());
+			FileUtil.writeFile(Config.DATA_DIR + "/data/allgp.txt", buf.toString());
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -2262,7 +2263,7 @@ public class RunUtils {
 				}
 			}
 
-			FileUtil.writeFile(StringPool.PROJECT_DIR + "/data/cate.txt", buf.toString());
+			FileUtil.writeFile(Config.DATA_DIR + "/data/cate.txt", buf.toString());
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -2395,7 +2396,7 @@ public class RunUtils {
 			}
 
 			System.out.println("一共【" + count + "】只票");
-			FileUtil.writeFile(StringPool.PROJECT_DIR + "/data/cate.txt", buf.toString());
+			FileUtil.writeFile(Config.DATA_DIR + "/data/cate.txt", buf.toString());
 
 		} catch (Exception e) {
 			e.printStackTrace();
