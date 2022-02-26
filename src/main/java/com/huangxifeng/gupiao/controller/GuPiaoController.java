@@ -4,8 +4,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -46,6 +48,18 @@ public class GuPiaoController {
 		RunZhangTingDiXi.sort(zxlist,
 				org.apache.commons.lang3.StringUtils.defaultString(px, org.apache.commons.lang3.StringUtils.EMPTY));
 		return zxlist;
+	}
+	/*
+	 *  连续两天涨停
+	 */
+	@RequestMapping(value = "/ztdx-2dy")
+	@ResponseBody
+	public Object gotoZtdx_2dyPage(TableRequest req) {
+		List<JianKongVO> ztlist = RunJianKong.getList(JianKongVO.Type.ZT2D_LIST);
+		// 监控涨停股低高开比
+		QingXuJianKongVO ztjkvo = QingXuJianKongVO.monitor(ztlist);
+		RunJianKong.sort(ztlist, "cate");
+		return ztlist;
 	}
 
 	/**
@@ -109,12 +123,20 @@ public class GuPiaoController {
 		return hylist;
 	}
 
-	@RequestMapping(value = "/ztdxAjax")
-	public String ztdxAjax(Model model, @RequestParam(name = "px", required = false, defaultValue = "sort") String px,
+	@RequestMapping(value = "/ztdxAjax{version}")
+	public String ztdxAjax(Model model,@PathVariable(required = false,name = "version") String version,
+			@RequestParam(name = "px", required = false, defaultValue = "sort") String px,
+			@RequestParam(name = "hpx", required = false, defaultValue = "zdf") String hpx) {
+		pageInfo(model, px, hpx);
+		 
+		return "gupiao/ztdxAjax"+StringUtils.trimToEmpty(version);
+	}
+	@RequestMapping(value = "/ztdxAjaxold222")
+	public String ztdxAjaxold(Model model, @RequestParam(name = "px", required = false, defaultValue = "sort") String px,
 			@RequestParam(name = "hpx", required = false, defaultValue = "zdf") String hpx) {
 		pageInfo(model, px, hpx);
 		;
-		return "gupiao/ztdxAjax";
+		return "gupiao/ztdxAjaxold";
 	}
 
 	/**
@@ -210,7 +232,7 @@ public class GuPiaoController {
 		if (p.equals("zt")) {
 			RunZhuiZhangTing.run();
 		}
-
+		
 		return "gupiao/run";
 	}
 

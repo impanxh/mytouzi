@@ -258,7 +258,7 @@ public class RunZhangTingDiXi {
 		
 		try {
 			
-			String fileurl = Config.DATA_DIR + "\\data\\超短低吸.xlsx";
+			String fileurl = Config.DATA_DIR + "/data/超短低吸.xlsx";
 
 			XSSFWorkbook xssfWorkbook = new XSSFWorkbook(new FileInputStream(fileurl));
 			//int sheets = xssfWorkbook.getNumberOfSheets();
@@ -419,11 +419,15 @@ public class RunZhangTingDiXi {
 					map.put(dxvo.getCid(), dxvo);
 				}
 
-				Thread.sleep(1000);
+				
 			} catch (Exception e) {
 				System.out.println("[" + cids + "]");
 				e.printStackTrace();
 				
+			}
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
 			}
 		}
 	}

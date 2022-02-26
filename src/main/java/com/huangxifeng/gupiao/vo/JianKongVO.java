@@ -20,7 +20,7 @@ public class JianKongVO extends GuPiaoBaseVO
 	String jxz      = "";  // 均线值说明
 	
 	public static class Type
-	{
+	{	public static String ZT2D_LIST = "ZT2D_LIST";
 		public static String ZT_LIST = "ZT_LIST";
 		public static String DT_LIST = "DT_LIST";
 		public static String GB_LIST = "GB_LIST";

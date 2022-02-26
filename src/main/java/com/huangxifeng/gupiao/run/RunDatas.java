@@ -78,6 +78,10 @@ public class RunDatas {
 		
 		// 涨停列表
 		RunUtils.getZhangTingList();
+		//连续两表涨停
+		RunUtils.getZhangTing2DaysList();
+		
+		
 		
 		// 跌停列表
 		RunUtils.getDieTingList();
@@ -2251,7 +2255,7 @@ public class RunDatas {
 		}
 		
 		StringBuffer strbuf = new StringBuffer("编号#名称#分类#15天板#15d成交均量#均线值\n");
-		System.out.println("编号#名称#分类#15天板#15d成交均量#均线值");
+		//System.out.println("编号#名称#分类#15天板#15d成交均量#均线值");
 		
 		int num = 0;
 		
@@ -2297,7 +2301,7 @@ public class RunDatas {
 			//15天平均交易量
 			Double liang15d = RunUtils.getDayLiangAve(vo.getCid(), 15);
 			
-			System.out.println(vo.toString() + "#" + allnum + "#" + liang15d + "#" + jxz);
+			//System.out.println(vo.toString() + "#" + allnum + "#" + liang15d + "#" + jxz);
 			strbuf.append(vo.toString() + "#" + allnum + "#" + liang15d + "#" + jxz).append("\n");
 			
 			num ++;
@@ -2310,7 +2314,7 @@ public class RunDatas {
 			e.printStackTrace();
 		}
 		
-		System.out.println("一共：" + num + "条数据");
+		System.out.println("高板股票 15天5天涨停列表 一共：" + num + "条数据");
 	}
 	
 	/**
@@ -2337,7 +2341,7 @@ public class RunDatas {
 		}
 		
 		StringBuffer strbuf = new StringBuffer("编号#名称#分类#15天板#15d成交均量\n");
-		System.out.println("编号#名称#分类#15天板#15d成交均量");
+		//System.out.println("编号#名称#分类#15天板#15d成交均量");
 		
 		int num = 0;
 		
@@ -2358,7 +2362,7 @@ public class RunDatas {
 			if (allnum >= 1)
 			{
 				liang15d = RunUtils.getDayLiangAve(vo.getCid(), 15);
-				System.out.println(vo.toString() + "#" + allnum + "#" + liang15d);
+				//System.out.println(vo.toString() + "#" + allnum + "#" + liang15d);
 				strbuf.append(vo.toString() + "#" + allnum + "#" + liang15d).append("\n");
 				num ++;
 				continue;
@@ -2369,7 +2373,7 @@ public class RunDatas {
 			if (allnum >= 4)
 			{
 				liang15d = RunUtils.getDayLiangAve(vo.getCid(), 15);
-				System.out.println(vo.toString() + "#" + allnum + "#" + liang15d);
+				//System.out.println(vo.toString() + "#" + allnum + "#" + liang15d);
 				strbuf.append(vo.toString() + "#" + allnum + "#" + liang15d).append("\n");
 				num ++;
 				continue;
@@ -2383,7 +2387,7 @@ public class RunDatas {
 			e.printStackTrace();
 		}
 		
-		System.out.println("一共：" + num + "条数据");
+		System.out.println("行业监控票（15天5次涨停，3天1次涨停）  一共：" + num + "条数据");
 	}
 	
 	public static void runZt23HuiceGP()

@@ -127,11 +127,11 @@ public class GuPiaoApplication extends SpringBootServletInitializer implements W
 		// 静态资源
 		registry.addResourceHandler("/static/**").addResourceLocations("classpath:/static/");
 		//如果是linux 发布 去掉classPath:
-		registry.addResourceHandler("/js/**").addResourceLocations("classpath:/js/");
-		registry.addResourceHandler("/css/**").addResourceLocations("classpath:/css/");   
+		//registry.addResourceHandler("/js/**").addResourceLocations("classpath:/js/");
+		//registry.addResourceHandler("/css/**").addResourceLocations("classpath:/css/");   
 		
-		//registry.addResourceHandler("/js/**").addResourceLocations("/js/");
-		//registry.addResourceHandler("/css/**").addResourceLocations("/css/");   
+		registry.addResourceHandler("/js/**").addResourceLocations("/js/");
+		registry.addResourceHandler("/css/**").addResourceLocations("/css/");   
 	}
 
 }

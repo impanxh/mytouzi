@@ -11,3 +11,6 @@ src/main/resources/.DS_Store
 src/main/.DS_Store
 src/.DS_Store
 lib/.DS_Store
+src/main/resources/config/config.properties
+src/main/resources/templates/gupiao/ztdxAjaxold.html
+src/main/resources/config/config.properties

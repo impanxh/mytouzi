@@ -81,7 +81,7 @@ public class RunUtils {
 
 		//这个每天晚上18点后执行这个，把每个个股的数据采集下来，不然都是昨天的
 		//每天晚上18点后就执行这个就好
-		downloadDayFile();
+		//downloadDayFile();
 
 		//这里就5个列表，都要跑
 		RunDatas.main(null);
@@ -176,29 +176,185 @@ public class RunUtils {
 		//
 	}
 
+	public static List<String> getZhangTing2DaysList() {
+		return getZhangTing2DaysList(DateUtil.format(new Date(), DateUtil.YYYYMMDD));
+	}
+	
+	
+		// 获取连着指定 2天指定日涨停股票
+		public static List<String> getZhangTing2DaysList(String date) {
+
+			String ztgpfile = Config.DATA_DIR + "/data/ztlist/2dztgp-" + date + ".txt";
+			String ztdayfile = Config.DATA_DIR + "/data/run/2dztgp.txt";
+
+			deleteIfexist(ztgpfile, ztdayfile);
+
+			List<String> list = new ArrayList<String>();
+			StringBuffer strbuf = new StringBuffer("股票ID#股票名称#行业#15天涨停#涨停类型#30日涨跌比\n");
+			System.out.println("股票ID#股票名称#行业#15天涨停#涨停类型#30日涨跌比");
+				
+			// 读取所有股票文件方法
+			List<GuPiaoBaseVO> allgplist = RunUtils.getAllGpVoList();
+			DecimalFormat df = new DecimalFormat("0.00");
+
+			int ztnum = 0;
+			
+			for (int i = 0; i < allgplist.size(); i++)
+			{
+				GuPiaoBaseVO vo = allgplist.get(i);
+
+				if (!vo.isOK())
+				{
+					continue;
+				}
+
+				try {
+					String gpdaylist = RunUtils.getGpDayBody(vo.getCid());
+
+					String[] splist = gpdaylist.split("\n");
+					String[] infos  = splist[1].split(" ");
+
+					// 上市天数
+					int dnum = Integer.valueOf(infos[1].replace("total:", ""));
+					if(dnum == 0)
+					{
+						continue;
+					}
+
+					// 上市时间
+					//String startDate = infos[2].replace("start:", "");
+					
+					// 时间，开盘，收盘，最高，最低，量
+					// 210402 30.00 30.00 30.08 29.65 381350\n\
+					// 今天价格数据
+					String[] jtinfos = splist[splist.length - 2].split(" ");
+					int jtkpj = (int) (Double.valueOf(jtinfos[1]) * 100); // 开盘价
+					int jtspj = (int) (Double.valueOf(jtinfos[2]) * 100); // 收盘价
+					int jtzgj = (int) (Double.valueOf(jtinfos[3]) * 100); // 最高价
+					//Double zgjdb = Double.valueOf(jtinfos[3]);
+					int jtzdj = (int) (Double.valueOf(jtinfos[4]) * 100); // 最低价
+
+					// 昨天价格数据
+					String[] ztinfos = splist[splist.length - 3].split(" ");
+					int ztspj = (int) (Double.valueOf(ztinfos[2]) * 100); // 收盘价
+
+					if(jtspj < ztspj)
+					{
+						continue;
+					}
+					// 涨跌幅小于9.8 过滤
+					String zdf = df.format((float) (jtspj - ztspj) / ztspj);
+					if ((int) (Double.valueOf(zdf) * 1000) < 98)
+					{
+						continue;
+					}
+
+					if(vo.is3068())
+					{
+						if ((int) (Double.valueOf(zdf) * 1000) < 190)
+						{
+							//System.out.println(vo.toString());
+							continue;
+						}
+					}
+					if(!vo.getName().equals("京城股份")) {
+						//continue;
+					}
+						
+
+					// 涨停类型
+					String ztlx = "";
+					if (jtkpj == jtspj && jtzgj == jtzdj && jtkpj == jtzdj)
+					{
+						ztlx = "一字板";
+					}
+
+					if (jtkpj == jtspj && jtzgj > jtzdj) {
+						ztlx = "T字板";
+					}
+					if (jtkpj < jtzgj || jtzdj < jtzdj) { 
+						ztlx = "T字板";
+					}
+					//----------------------------------两涨停判断
+					
+					 jtinfos = splist[splist.length - 3].split(" ");
+					  jtkpj = (int) (Double.valueOf(jtinfos[1]) * 100); // 开盘价
+					  jtspj = (int) (Double.valueOf(jtinfos[2]) * 100); // 收盘价
+					  jtzgj = (int) (Double.valueOf(jtinfos[3]) * 100); // 最高价
+					//Double zgjdb = Double.valueOf(jtinfos[3]);
+					  jtzdj = (int) (Double.valueOf(jtinfos[4]) * 100); // 最低价
+
+					// 昨天价格数据
+					ztinfos = splist[splist.length - 4].split(" ");
+					  ztspj = (int) (Double.valueOf(ztinfos[2]) * 100); // 收盘价
+
+					if(jtspj < ztspj)
+					{
+						continue;
+					}
+					// 涨跌幅小于9.8 过滤
+					  zdf = df.format((float) (jtspj - ztspj) / ztspj);
+					if ((int) (Double.valueOf(zdf) * 1000) < 98)
+					{
+						continue;
+					}
+
+					if(vo.is3068())
+					{
+						if ((int) (Double.valueOf(zdf) * 1000) < 190)
+						{
+							//System.out.println(vo.toString());
+							continue;
+						}
+					}
+					
+					
+					// 分类
+					if (ValidateUtil.isNull(vo.getCate())) {
+						vo.setCate(getCate(vo.getCid()));
+					}
+
+					// 15天涨停数量
+					int zt15dnum = getZhangTingDays(vo.getCid(), 15);
+ 
+
+					// 30天涨跌比
+					String _30dayzdb = "";
+					if (dnum > 30)
+					{
+						ZhangDieBiVO ztvo = getZdb(vo.getCid(), 30);
+						_30dayzdb = ztvo.getZhangb().toString();
+					}
+ 
+					String textinfo = vo.toString() + "#" + zt15dnum + "#" + ztlx + "#" + _30dayzdb ;
+					
+				//	System.out.println(textinfo);
+					strbuf.append(textinfo).append("\n");
+					list.add(textinfo);
+					ztnum ++;
+				} catch (Exception e) {
+					System.out.println(vo.toString());
+					e.printStackTrace();
+				}
+			}
+			
+			System.out.println("双涨停列表 一共：" + ztnum + "条数据");
+
+			FileUtil.writeFile(ztgpfile, strbuf.toString());
+			FileUtil.writeFile(ztdayfile, strbuf.toString());
+
+			return list;
+		}
 	public static List<String> getZhangTingList() {
 		return getZhangTingList(DateUtil.format(new Date(), DateUtil.YYYYMMDD));
 	}
-
 	// 获取指定日涨停股票
 	public static List<String> getZhangTingList(String date) {
 
 		String ztgpfile = Config.DATA_DIR + "/data/ztlist/ztgp-" + date + ".txt";
 		String ztdayfile = Config.DATA_DIR + "/data/run/ztgp.txt";
 
-		try {
-
-			if (FileUtil.isExist(ztgpfile)) {
-				FileUtil.removeFile(ztgpfile, true);
-			}
-
-			if (FileUtil.isExist(ztdayfile)) {
-				FileUtil.removeFile(ztdayfile, true);
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		deleteIfexist(ztgpfile, ztdayfile);
 
 		List<String> list = new ArrayList<String>();
 		//StringBuffer strbuf = new StringBuffer(
@@ -372,7 +528,7 @@ public class RunUtils {
 				// 股票ID#股票名称#行业#上市时间#上市天数#总市值#流通市值#市盈率TTM#涨跌幅#涨停类型#最高价#最高价日#最高价比#30日涨#30日跌#30日涨跌比
 				String textinfo = vo.toString() + "#" + zt15dnum + "#" + ztlx + "#" + _30dayzdb ;
 				
-				System.out.println(textinfo);
+			//	System.out.println(textinfo);
 				strbuf.append(textinfo).append("\n");
 				list.add(textinfo);
 				ztnum ++;
@@ -382,12 +538,28 @@ public class RunUtils {
 			}
 		}
 		
-		System.out.println("一共：" + ztnum + "条数据");
+		System.out.println("涨停列表 一共：" + ztnum + "条数据");
 
 		FileUtil.writeFile(ztgpfile, strbuf.toString());
 		FileUtil.writeFile(ztdayfile, strbuf.toString());
 
 		return list;
+	}
+
+	private static void deleteIfexist(String ztgpfile, String ztdayfile) {
+		try {
+
+			if (FileUtil.isExist(ztgpfile)) {
+				FileUtil.removeFile(ztgpfile, true);
+			}
+
+			if (FileUtil.isExist(ztdayfile)) {
+				FileUtil.removeFile(ztdayfile, true);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public static List<String> getDieTingList()
@@ -401,24 +573,12 @@ public class RunUtils {
 		String dtgpfile = Config.DATA_DIR + "/data/dtlist/dtgp-" + date + ".txt";
 		String dtdayfile = Config.DATA_DIR + "/data/run/dtgp.txt";
 
-		try {
-
-			if (FileUtil.isExist(dtgpfile)) {
-				FileUtil.removeFile(dtgpfile, true);
-			}
-
-			if (FileUtil.isExist(dtdayfile)) {
-				FileUtil.removeFile(dtdayfile, true);
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		deleteIfexist(dtgpfile, dtdayfile);
 
 		List<String> list = new ArrayList<String>();
 
 		StringBuffer strbuf = new StringBuffer("股票ID#股票名称#行业#15天涨停#跌停类型#30日涨跌比\n");
-		System.out.println("股票ID#股票名称#行业#15天涨停#跌停类型#30日涨跌比");
+		//System.out.println("股票ID#股票名称#行业#15天涨停#跌停类型#30日涨跌比");
 			
 		// 读取所有股票文件方法
 		List<GuPiaoBaseVO> allgplist = RunUtils.getAllGpVoList();
@@ -518,7 +678,7 @@ public class RunUtils {
 				
 				String textinfo = vo.toString() + "#" + zt15dnum + "#" + ztlx + "#" + _30dayzdb ;
 				
-				System.out.println(textinfo);
+				//System.out.println(textinfo);
 				strbuf.append(textinfo).append("\n");
 				list.add(textinfo);
 				
@@ -530,7 +690,7 @@ public class RunUtils {
 			}
 		}
 		
-		System.out.println("一共：" + dtnum + "条数据");
+		System.out.println("跌停列表 一共：" + dtnum + "条数据");
 
 		FileUtil.writeFile(dtgpfile, strbuf.toString());
 		FileUtil.writeFile(dtdayfile, strbuf.toString());
@@ -598,7 +758,7 @@ public class RunUtils {
 					JiBenMianVO jbm = getJiBenMianString(cxvo.getCid());
 					cxvo.valueOfJBM(jbm);
 
-					System.out.println(cxvo.toString());
+					//System.out.println(cxvo.toString());
 					strbuf.append(cxvo.toString()).append("\n");
 					list.add(cxvo);
 
@@ -962,7 +1122,7 @@ public class RunUtils {
 		// 读取所有股票文件方法
 		List<GuPiaoBaseVO> list = getAllGpVoList();
 
-		System.out.println("股票ID#股票名称#分类");
+		//System.out.println("股票ID#股票名称#分类");
 
 		for (int i = 0; i < list.size(); i++)
 		{
@@ -991,7 +1151,7 @@ public class RunUtils {
 				//	continue;
 				//}
 
-				System.out.println(vo.toString());
+			//	System.out.println(vo.toString());
 				yibuf.append(vo.toString() + "\n");
 				yilist.add(vo);
 
@@ -1003,7 +1163,7 @@ public class RunUtils {
 
 		FileUtil.writeFile(yyfile, yibuf.toString());
 
-		System.out.println("一共：" + yilist.size() + "条数据");
+		System.out.println(" 获取所有股票里月成交量及25天成交量大于1亿的股票 一共：" + yilist.size() + "条数据");
 
 		return yilist;
 	}
@@ -1129,15 +1289,21 @@ public class RunUtils {
 		}
 
 		List<GuPiaoBaseVO> list = getAllGpVoList();
-		int count = 0;
-		for (int i = 0; i < list.size(); i++) {
+		float count = 0;
+		int length = list.size();
+		DecimalFormat decimalFormat = new DecimalFormat(".00");
+		for (int i = 0; i < length; i++) {
 			GuPiaoBaseVO vo = list.get(i);
 			// if(vo.isOK())
 			{
 				try {
-					if( (count++) % 300 == 0) {
-						System.out.println(vo.toString());
+					
+					if( (count % 300) == 0){
+						float bl = new Float(  ((float)(count/length*100))).floatValue() ;
+						System.out.println("downMeta: " + length + " - "+ (int)count +" - " + (int) bl +"%"); 
 					}
+					count++;
+					
 					
 					getGpDayBody(vo.getCid());
 				} catch (Exception e) {

@@ -30,6 +30,8 @@ public class RunJianKong
 	private static Map<String, JianKongVO> map = new HashMap<String, JianKongVO>();
 	
 	private static Map<String, String> ztmap = new HashMap<String, String>();
+	
+	private static Map<String, String> zt2dmap = new HashMap<String, String>();
 	private static Map<String, String> dtmap = new HashMap<String, String>();
 	private static Map<String, String> gbmap = new HashMap<String, String>();
 	private static Map<String, String> hymap = new HashMap<String, String>();
@@ -93,12 +95,51 @@ public class RunJianKong
 	{
 		return isrun;
 	}
+	
+	public static void readGpCommon(String title,String path ,String type,Map<String, String> typeMap) {
+		//跌停列表 
+		String dtfileurl = Config.DATA_DIR + path;
+		List<String> list = FileUtil.readToStringList(dtfileurl, StringPool.UTF_8);
+		System.out.println("=========== 读取"+title+"列表  ===========");
+		for (int i = 0; i < list.size(); i++)
+		{
+			String txt = list.get(i);
+			if(txt.contains("编号"))
+			{
+				continue;
+			}
+			JianKongVO vo = new JianKongVO();
+			vo.valueOf(txt);
+			vo.setType(type);
+			typeMap.put(vo.getCid(), vo.getCid());
+			map.put(vo.getCid(), vo);
+			
+			if(type.equals(JianKongVO.Type.ZT2D_LIST)) {
+				String[] array = txt.split("#");
+				vo.setJxz(array[4]);
+			}
+		}
+		System.out.println(title + "一共读取 " + list.size() + " 条数据");
+	}
+	
 
 	public static void init()
 	{
 		
 		try {
 			
+			 
+			readGpCommon("读取跌停列表","/data/run/dtgp.txt",JianKongVO.Type.DT_LIST,dtmap);
+			
+			readGpCommon("读取涨停列表","/data/run/ztgp.txt",JianKongVO.Type.ZT_LIST,ztmap);
+			
+			readGpCommon("高标列表","/data/run/gbgp.txt",JianKongVO.Type.GB_LIST,gbmap);
+			
+			readGpCommon("行业列表","/data/run/hygp.txt",JianKongVO.Type.HY_LIST,hymap);
+			
+			readGpCommon("连续两天涨停","/data/run/2dztgp.txt",JianKongVO.Type.ZT2D_LIST,zt2dmap);
+			
+			/* 
 			//跌停列表
 			String dtfileurl = Config.DATA_DIR + "/data/run/dtgp.txt";
 			List<String> list = FileUtil.readToStringList(dtfileurl, StringPool.UTF_8);
@@ -177,7 +218,7 @@ public class RunJianKong
 				hymap.put(vo.getCid(), vo.getCid());
 				map.put(vo.getCid(), vo);
 			}
-			System.out.println("一共读取 " + list.size() + " 条数据");
+			System.out.println("一共读取 " + list.size() + " 条数据");*/
 			
 			StringBuffer s_cidsBuf = new StringBuffer();
 			for (String key : map.keySet())
@@ -255,6 +296,7 @@ public class RunJianKong
 				//System.out.println(s_gpstrs.length);
 				
 				List<JianKongVO> ztlist = new ArrayList<JianKongVO>();
+				List<JianKongVO> zt2dlist = new ArrayList<JianKongVO>();
 				List<JianKongVO> dtlist = new ArrayList<JianKongVO>();
 				List<JianKongVO> gblist = new ArrayList<JianKongVO>();
 				List<JianKongVO> hylist = new ArrayList<JianKongVO>();
@@ -309,6 +351,14 @@ public class RunJianKong
 						ztlist.add(dxvo);
 					}
 					
+					if(zt2dmap.containsKey(dxvo.getCid()))
+					{
+						zt2dlist.add(dxvo);
+					}
+					
+					
+					
+					
 					if(dtmap.containsKey(dxvo.getCid()))
 					{
 						dtlist.add(dxvo);
@@ -324,7 +374,7 @@ public class RunJianKong
 						hylist.add(dxvo);
 					}
 				}
-				
+				listmap.put(JianKongVO.Type.ZT2D_LIST, zt2dlist);
 				listmap.put(JianKongVO.Type.DT_LIST, dtlist);
 				listmap.put(JianKongVO.Type.ZT_LIST, ztlist);
 				listmap.put(JianKongVO.Type.GB_LIST, gblist);
