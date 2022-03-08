@@ -67,8 +67,8 @@ public class RunDatas {
 		// 底背离股票
 		//runDibeiliGP();
 
-		// 涨停回撤股
-		//runZhangtingHuiceGP();
+		// 涨停回撤股 低吸
+		RunDatas.runZhangtingHuiceGP();
 		
 		//这里都是交易模式的数据 个股
 		
@@ -78,10 +78,9 @@ public class RunDatas {
 		
 		// 涨停列表
 		RunUtils.getZhangTingList();
+		
 		//连续两表涨停
 		RunUtils.getZhangTing2DaysList();
-		
-		
 		
 		// 跌停列表
 		RunUtils.getDieTingList();
@@ -1882,8 +1881,9 @@ public class RunDatas {
 
 	public static void runZhangtingHuiceGP()
 	{
-		//10天内1次涨停
-		//10天内平均成交量5亿
+		//15天内3次涨停
+		//5天内1次跌停
+		//15天最高和最低位相差 -15%
 		List<GuPiaoBaseVO> list = RunUtils.get1YiList(false);
 
 		int num = 0;
@@ -1898,128 +1898,137 @@ public class RunDatas {
 
 			try {
 
-				//10天内1次涨停
-				int ztnum = RunUtils.getZhangTingDays(vo.getCid(), 10);
-				if (ztnum < 1 || ztnum > 1)
+				//上市大于100天的
+				String gpdlist = RunUtils.getGpDayBody(vo.getCid());
+				String[] splist = gpdlist.split("\n");
+				//if (splist.length < 103)
+				if (splist.length < 80)
+				{
+					continue;
+				}
+				
+				//15天内3次涨停
+				int ztnum = RunUtils.getZhangTingDays(vo.getCid(), 15);
+				if (ztnum < 3)
+				{
+					continue;
+				}
+				
+				int dtnum = RunUtils.getDieTingDays(vo.getCid(), 5);
+				if(dtnum < 1)
 				{
 					continue;
 				}
 				
 				//10天内平均成交量 > 5亿
-				Double liangAve = RunUtils.getDayLiangAve(vo.getCid(), 10);
-				if (liangAve.compareTo(5.0) < 0)
-				{
-					continue;
-				}
+				Double liangAve = RunUtils.getDayLiangAve(vo.getCid(), 20);
+//				if (liangAve.compareTo(5.0) < 0)
+//				{
+//					continue;
+//				}
 				
-				//上市大于100天的
-				String gpdlist = RunUtils.getGpDayBody(vo.getCid());
-				String[] splist = gpdlist.split("\n");
-				if (splist.length < 103)
-				{
-					continue;
-				}
+				System.out.println(vo.toString() + "#" + liangAve + "#" + ztnum + "#" + dtnum);
 				
 				//int stnum = 2;
-				int ednum = splist.length - 2;
-				
-				Double ssj = 0.0; //今日实时价
-				Double kpj = 0.0; //今日开盘价
-				Double spj = 0.0; //今日收盘价
-				Double zdj = 0.0; //今日最低价
-				
-				Calendar c = Calendar.getInstance();
-				int hour = c.get(Calendar.HOUR_OF_DAY);
-				//int minute = c.get(Calendar.MINUTE);
-				
-				//晚上
-				if(hour > 19 || hour < 9)
-				{
-					// 最新当天数据
-					String[] infos = splist[ednum].split(" ");
-					kpj = Double.valueOf(infos[1]);//今日开盘价
-					spj = Double.valueOf(infos[2]);//今日收盘价
-					zdj = Double.valueOf(infos[4]);//今日最低价
-					ssj = zdj;
-				} else {
-
-					//实时数据
-					String zsz = HttpClientUtil.getInstance().doGet("http://qt.gtimg.cn/q=" + vo.getCid());
-					String[] spz = zsz.split("~");
-					kpj = Double.valueOf(spz[5]);
-					spj = Double.valueOf(spz[3]);
-					zdj = Double.valueOf(spz[34]);
-					ssj = spj;
-					
-					if(Double.valueOf(spz[32]).compareTo(5.0) > 0)
-					{
-						continue;
-					}
-				}
-				
-				if(ssj.compareTo(kpj) < 0)
-				{
-					//System.out.println("当前跌：" + spj + "-" + kpj + ">" + vo.toString());
-					continue;
-				}
-				
-				//最低价 跌破 20日线
-				//Double _20jx = RunUtils.getDayAvePrice(vo.getCid(), 20);
-				//if(spj.compareTo(_20jx) < 0)
-				//{
-				//	System.out.println("最低价破20日线：>" + vo.toString());
-				//	continue;
-				//}
-				
-				//Double ztkpj = 0.0; //涨停开盘价
-				Double ztspj = 0.0; //涨停收盘价
-				
-				//涨停开盘价
-				for (int n = ednum - 1; n >= 92; n--)
-				{
-					//System.out.println(splist[n]);
-					String[] str = splist[n].split(" ");
-					
-					//Double dtkpj = Double.valueOf(str[1]); //当天开盘价
-					Double dtspj = Double.valueOf(str[2]); //当天收盘价
- 
-					// 昨天数据
-					String ztdayStr = splist[n - 1].replace("\\n\\", "");
-					String[] ztspdayStr = ztdayStr.split(" ");
-					if (ztspdayStr.length != 6) {
-						continue;
-					}
-					// 昨天收盘价
-					Double zspj = Double.valueOf(ztspdayStr[2]);
-
-					// 涨停算法 = （当天收盘价 - 昨天收盘价） / 昨天收盘价 > 9.8
-					if (DoubleUtil.div(DoubleUtil.sub(dtspj, zspj), zspj, 2) > 0.098)
-					{
-						//ztkpj = dtkpj;
-						ztspj = dtspj;
-						break;
-					}
-				}
-				
-				//已上涨 剔除 
-				if(ssj > ztspj)
-				{
-					continue;
-				}
-				
-				Double sszdf = DoubleUtil.div(DoubleUtil.sub(ztspj, ssj), ztspj , 2);
-				if(sszdf.compareTo(0.07) < 0 || sszdf.compareTo(0.13) > 0 )
-				{
-					//System.out.println("跌幅太大或太小:#涨停价：" + ztspj + " - 实时价：" + ssj + " > 跌幅:[" + sszdf + "]" + vo.toString());
-					continue;
-				}
-				
-				//System.out.println("涨停开盘价:" + ztkpj);
-				//System.out.println("今日最低价:" + zdj);
-				//System.out.println("涨停距离:" + jzt);
-				System.out.println(vo.toString() + "#涨停价：" + ztspj + " - 实时价：" + ssj + " > 跌幅:[" + sszdf + "]");
-				//break;
-				//System.out.println(vo.toString());
+//				int ednum = splist.length - 2;
+//				
+//				Double ssj = 0.0; //今日实时价
+//				Double kpj = 0.0; //今日开盘价
+//				Double spj = 0.0; //今日收盘价
+//				Double zdj = 0.0; //今日最低价
+//				
+//				Calendar c = Calendar.getInstance();
+//				int hour = c.get(Calendar.HOUR_OF_DAY);
+//				//int minute = c.get(Calendar.MINUTE);
+//				
+//				//晚上
+//				if(hour > 19 || hour < 9)
+//				{
+//					// 最新当天数据
+//					String[] infos = splist[ednum].split(" ");
+//					kpj = Double.valueOf(infos[1]);//今日开盘价
+//					spj = Double.valueOf(infos[2]);//今日收盘价
+//					zdj = Double.valueOf(infos[4]);//今日最低价
+//					ssj = zdj;
+//				} else {
+//
+//					//实时数据
+//					String zsz = HttpClientUtil.getInstance().doGet("http://qt.gtimg.cn/q=" + vo.getCid());
+//					String[] spz = zsz.split("~");
+//					kpj = Double.valueOf(spz[5]);
+//					spj = Double.valueOf(spz[3]);
+//					zdj = Double.valueOf(spz[34]);
+//					ssj = spj;
+//					
+//					if(Double.valueOf(spz[32]).compareTo(5.0) > 0)
+//					{
+//						continue;
+//					}
+//				}
+//				
+//				if(ssj.compareTo(kpj) < 0)
+//				{
+//					//System.out.println("当前跌：" + spj + "-" + kpj + ">" + vo.toString());
+//					continue;
+//				}
+//				
+//				//最低价 跌破 20日线
+//				//Double _20jx = RunUtils.getDayAvePrice(vo.getCid(), 20);
+//				//if(spj.compareTo(_20jx) < 0)
+//				//{
+//				//	System.out.println("最低价破20日线：>" + vo.toString());
+//				//	continue;
+//				//}
+//				
+//				//Double ztkpj = 0.0; //涨停开盘价
+//				Double ztspj = 0.0; //涨停收盘价
+//				
+//				//涨停开盘价
+//				for (int n = ednum - 1; n >= 92; n--)
+//				{
+//					//System.out.println(splist[n]);
+//					String[] str = splist[n].split(" ");
+//					
+//					//Double dtkpj = Double.valueOf(str[1]); //当天开盘价
+//					Double dtspj = Double.valueOf(str[2]); //当天收盘价
+// 
+//					// 昨天数据
+//					String ztdayStr = splist[n - 1].replace("\\n\\", "");
+//					String[] ztspdayStr = ztdayStr.split(" ");
+//					if (ztspdayStr.length != 6) {
+//						continue;
+//					}
+//					// 昨天收盘价
+//					Double zspj = Double.valueOf(ztspdayStr[2]);
+//
+//					// 涨停算法 = （当天收盘价 - 昨天收盘价） / 昨天收盘价 > 9.8
+//					if (DoubleUtil.div(DoubleUtil.sub(dtspj, zspj), zspj, 2) > 0.098)
+//					{
+//						//ztkpj = dtkpj;
+//						ztspj = dtspj;
+//						break;
+//					}
+//				}
+//				
+//				//已上涨 剔除 
+//				if(ssj > ztspj)
+//				{
+//					continue;
+//				}
+//				
+//				Double sszdf = DoubleUtil.div(DoubleUtil.sub(ztspj, ssj), ztspj , 2);
+//				if(sszdf.compareTo(0.07) < 0 || sszdf.compareTo(0.13) > 0 )
+//				{
+//					//System.out.println("跌幅太大或太小:#涨停价：" + ztspj + " - 实时价：" + ssj + " > 跌幅:[" + sszdf + "]" + vo.toString());
+//					continue;
+//				}
+//				
+//				//System.out.println("涨停开盘价:" + ztkpj);
+//				//System.out.println("今日最低价:" + zdj);
+//				//System.out.println("涨停距离:" + jzt);
+//				System.out.println(vo.toString() + "#涨停价：" + ztspj + " - 实时价：" + ssj + " > 跌幅:[" + sszdf + "]");
+//				//break;
+//				//System.out.println(vo.toString());
 				
 			} catch (Exception e) {
 				e.printStackTrace();

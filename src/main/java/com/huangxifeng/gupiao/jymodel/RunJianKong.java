@@ -20,7 +20,8 @@ public class RunJianKong
 {
 	public static void main(String[] args)
 	{
-		run();
+		//run();
+		init();
 	}
 	
 	private static String cids = "";
@@ -96,11 +97,12 @@ public class RunJianKong
 		return isrun;
 	}
 	
-	public static void readGpCommon(String title,String path ,String type,Map<String, String> typeMap) {
+	public static void readGpCommon(String title, String path , String type, Map<String, String> typeMap)
+	{
 		//跌停列表 
 		String dtfileurl = Config.DATA_DIR + path;
 		List<String> list = FileUtil.readToStringList(dtfileurl, StringPool.UTF_8);
-		System.out.println("=========== 读取"+title+"列表  ===========");
+		System.out.println("=========== 读取" + title + "列表  ===========");
 		for (int i = 0; i < list.size(); i++)
 		{
 			String txt = list.get(i);
@@ -129,15 +131,15 @@ public class RunJianKong
 		try {
 			
 			 
-			readGpCommon("读取跌停列表","/data/run/dtgp.txt",JianKongVO.Type.DT_LIST,dtmap);
+			readGpCommon("读取跌停列表", "/data/run/dtgp.txt", JianKongVO.Type.DT_LIST, dtmap);
 			
-			readGpCommon("读取涨停列表","/data/run/ztgp.txt",JianKongVO.Type.ZT_LIST,ztmap);
+			readGpCommon("读取涨停列表", "/data/run/ztgp.txt", JianKongVO.Type.ZT_LIST, ztmap);
 			
-			readGpCommon("高标列表","/data/run/gbgp.txt",JianKongVO.Type.GB_LIST,gbmap);
+			readGpCommon("高标列表", "/data/run/gbgp.txt", JianKongVO.Type.GB_LIST, gbmap);
 			
-			readGpCommon("行业列表","/data/run/hygp.txt",JianKongVO.Type.HY_LIST,hymap);
+			readGpCommon("行业列表", "/data/run/hygp.txt", JianKongVO.Type.HY_LIST, hymap);
 			
-			readGpCommon("连续两天涨停","/data/run/2dztgp.txt",JianKongVO.Type.ZT2D_LIST,zt2dmap);
+			readGpCommon("连续两天涨停", "/data/run/2dztgp.txt", JianKongVO.Type.ZT2D_LIST, zt2dmap);
 			
 			/* 
 			//跌停列表
