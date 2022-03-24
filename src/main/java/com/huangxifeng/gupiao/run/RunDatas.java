@@ -68,10 +68,9 @@ public class RunDatas {
 		//runDibeiliGP();
 
 		// 涨停回撤股 低吸
-		RunDatas.runZhangtingHuiceGP();
+		//RunDatas.runZhangtingHuiceGP();
 		
 		//这里都是交易模式的数据 个股
-		
 		
 		// 涨停龙头低吸
 		RunDatas.runLongtouDixiGP(true);  //我主要做这个
@@ -94,8 +93,8 @@ public class RunDatas {
 		// 大跌震荡行情股票
 		//runZhengdangGP();
 
-		// 大票
-		// runDaGP();
+		//高成交额大票
+		//runGaoLiangGP();
 		
 		//近10天内有连续2-3天涨停且往前数60天没有涨停的票+最后一次涨停回调比例超过10%+今天收了十字星的票(正负3个点以内都可以)
 		//runZt23HuiceGP();
@@ -1762,7 +1761,8 @@ public class RunDatas {
 		System.out.println(num);
 	}
 
-	public static void runDaGP() {
+	public static void runGaoLiangGP()
+	{
 		try {
 
 			int num = 0;
@@ -1773,28 +1773,32 @@ public class RunDatas {
 			for (int i = 0; i < list.size(); i++) {
 				GuPiaoBaseVO vo = list.get(i);
 
-				if (!vo.isOK() || !vo.is3068()) {
+				if (!vo.isOK() || vo.is3068())
+				{
 					continue;
 				}
 
 				// 上市天数>100
 				int upnum = RunUtils.getUpday(vo.getCid());
-				if (upnum < 100) {
+				if (upnum < 100)
+				{
 					continue;
 				}
 
 				// 20天平均交易量>4亿
 				Double liangAve = RunUtils.getDayLiangAve(vo.getCid(), 10);
-				if (liangAve.compareTo(10.0) < 0) {
+				if (liangAve.compareTo(10.0) < 0)
+				{
 					// System.out.println("10天平均交易量【" + liangAve + "】<10亿" +
 					// vo.toBaseString());
 					continue;
 				}
 
 				// 68天内必须涨停>1
-				ZhangDieBiVO zdbvo = RunUtils.getZdb(vo.getCid(), 10);
-				if (zdbvo.getZt() < 1) {
-					// System.out.println("68天内必须涨停>1" + vo.toBaseString());
+				ZhangDieBiVO zdbvo = RunUtils.getZdb(vo.getCid(), 88);
+				if (zdbvo.getZt() < 1)
+				{
+					 System.out.println("68天内必须涨停>1" + vo.toBaseString());
 					continue;
 				}
 				//
@@ -1869,7 +1873,7 @@ public class RunDatas {
 				// continue;
 				// }
 
-				System.out.println(vo.toString() + "#" + liangAve);
+				System.out.println(vo.toString() + "#" + liangAve + "#" + zdbvo.getZt());
 				num++;
 			}
 
@@ -1888,6 +1892,8 @@ public class RunDatas {
 
 		int num = 0;
 		
+		System.out.println("编号#名称#分类#总市值#流通市值#市盈率#15天交易量#平均换手#15天涨停#5天跌停#最高价#最高价时间#当前收盘价#最高当前价差比#15天涨幅#均线上#操作");
+		
 		for (int i = 0; i < list.size(); i++)
 		{
 			GuPiaoBaseVO vo = list.get(i);
@@ -1895,10 +1901,10 @@ public class RunDatas {
 			{
 				continue;
 			}
-
+			
 			try {
 
-				//上市大于100天的
+				//上市大于80天的
 				String gpdlist = RunUtils.getGpDayBody(vo.getCid());
 				String[] splist = gpdlist.split("\n");
 				//if (splist.length < 103)
@@ -1914,20 +1920,94 @@ public class RunDatas {
 					continue;
 				}
 				
+				//5天1次跌停
 				int dtnum = RunUtils.getDieTingDays(vo.getCid(), 5);
 				if(dtnum < 1)
 				{
 					continue;
+				} else {
+					
 				}
 				
-				//10天内平均成交量 > 5亿
-				Double liangAve = RunUtils.getDayLiangAve(vo.getCid(), 20);
-//				if (liangAve.compareTo(5.0) < 0)
-//				{
-//					continue;
-//				}
+				//15天内平均成交量  > 3亿
+				Double liangAve = RunUtils.getDayLiangAve(vo.getCid(), 15);
 				
-				System.out.println(vo.toString() + "#" + liangAve + "#" + ztnum + "#" + dtnum);
+				// 小于35过滤
+				GuPiaoInfoVO ifvo = RunUtils.getGuPiaoInfo(vo.getCid());
+				if (ifvo.getZsz().compareTo(35.0) < 0)
+				{
+					if (liangAve.compareTo(3.0) < 0)
+					{
+						System.out.println("小于35亿 & 15天内平均成交量 < 3亿" + vo.toBaseString());
+						continue;
+					}
+				}
+				
+				//破20日均线过滤
+				Double day20Price = RunUtils.getDayAvePrice(vo.getCid(), 20);
+				if(ifvo.getJtspj().compareTo(day20Price) < 0)
+				{
+					System.out.println("破20日均线过滤" + vo.toBaseString());
+					continue;
+				}
+				
+				if (liangAve.compareTo(3.0) < 0)
+				{
+					System.out.println("15天内平均成交量  < 3亿" + vo.toBaseString());
+					continue;
+				}
+				
+				int stnum = splist.length - 6;
+				int ednum = splist.length - 2;
+				
+				//System.out.println(vo.getCid() + "-" + vo.getName());
+				//System.out.println(stnum + "=" + splist[splist.length - 16]);
+				//System.out.println(ednum + "=" + splist[ednum]);
+
+				// 最新数据
+				String[] ed_infos = splist[ednum].split(" ");
+				Double ed_spj = Double.valueOf(ed_infos[2]);//收盘价
+				
+				// 开始数据
+				String[] st_infos = splist[splist.length - 16].split(" ");
+				Double st_zdj = Double.valueOf(st_infos[4]);//最低价
+
+				// 最高价 & 时间
+				Double zgj = 0.0;  // 最高价
+				String zgjday = "";// 最高价时间
+
+				for (int n = stnum; n <= ednum; n++)
+				{
+					String[] str = splist[n].split(" ");
+					Double myzgj = Double.valueOf(str[3]);// 今日最高价
+					//Double myzdj = Double.valueOf(str[4]);//今日最低价
+					if (myzgj.compareTo(zgj) > 0)
+					{
+						zgj = myzgj;
+						zgjday = str[0];
+					}
+				}
+
+				// 最高价 - 昨天收盘价  = 跌幅超过12
+				Double zdf = DoubleUtil.mul(DoubleUtil.div(DoubleUtil.sub(zgj, ed_spj, 2), zgj, 4), 100, 2);
+				if(zdf.compareTo(12.0) < 0)
+				{
+					System.out.println("跌幅小于12%" + vo.toBaseString());
+					continue;
+				}
+				
+				// 开始到现在的涨幅 
+				Double ed_zdf = DoubleUtil.mul(DoubleUtil.div(DoubleUtil.sub(ed_spj, st_zdj, 2), st_zdj, 4), 100, 2);
+				
+				
+//				Double day5 = RunUtils.getDayAvePrice(vo.getCid(), 5);
+//				Double day10 = RunUtils.getDayAvePrice(vo.getCid(), 10);
+				
+//				Double day30 = RunUtils.getDayAvePrice(vo.getCid(), 30);
+				
+				Double aveHuanshou = DoubleUtil.mul(DoubleUtil.div(liangAve, ifvo.getLtsz(), 4), 100, 2);
+				
+				System.out.println(vo.toString() + "#" + ifvo.getZsz() + "#" + ifvo.getLtsz() + "#" + ifvo.getSyl() + "#"+ liangAve + "#" + aveHuanshou + "%#"  + ztnum + "#" + dtnum + "#" + zgj + "#" + zgjday + "#" + ed_spj + "#" + zdf + "%#" + ed_zdf + "%#");
 				
 				//int stnum = 2;
 //				int ednum = splist.length - 2;
@@ -2144,7 +2224,7 @@ public class RunDatas {
 				}
 				
 				//15天平均交易量
-				Double liang15d = RunUtils.getDayLiangAve(dxvo.getCid(), 12);
+				Double liang15d = RunUtils.getDayLiangAve(dxvo.getCid(), 15);
 				dxvo.setLiang15d(liang15d.toString());
 				
 				//15天板
@@ -2208,6 +2288,12 @@ public class RunDatas {
 				}
 				
 				dxvo.setScore(RunZhangTingDiXi.score(dxvo));
+				
+				if(dxvo.getScore() < 20)
+				{
+					continue;
+				}
+				
 				newlist.add(dxvo);
 			}
 			

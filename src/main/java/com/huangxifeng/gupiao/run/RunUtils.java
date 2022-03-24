@@ -1160,7 +1160,7 @@ public class RunUtils {
 					continue;
 				}
 				
-//				int ztnum = RunUtils.getZhangTingDays(vo.getCid(), 38);
+				int ztnum = RunUtils.getZhangTingDays(vo.getCid(), 88);
 //				if (ztnum < 1) {
 //					continue;
 //				}
@@ -1170,7 +1170,7 @@ public class RunUtils {
 //					continue;
 //				}
 //				
-//				GuPiaoInfoVO info = getGuPiaoInfo(vo.getCid());
+				GuPiaoInfoVO info = getGuPiaoInfo(vo.getCid());
 //				if(info.getLtsz().compareTo(50.00) < 0)
 //				{
 //					continue;
@@ -1181,8 +1181,8 @@ public class RunUtils {
 //					continue;
 //				}
 //				
-//				System.out.println(vo.toString() + "#" + ztnum + "#" + info.getZsz() + "#" + info.getSyl());
-				System.out.println(vo.toString());
+				System.out.println(vo.toString() + "#" + liangAve + "#" + ztnum + "#" + info.getZsz() + "#" + info.getLtsz() + "#" + info.getSyl());
+				//System.out.println(vo.toString());
 				yibuf.append(vo.toString() + "\n");
 				yilist.add(vo);
 
