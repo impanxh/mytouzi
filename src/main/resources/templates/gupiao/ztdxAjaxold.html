@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>涨停低吸监控模型</title>
+    <style type="text/css">
+        body{
+            background-color: #DDDDDD;
+        }
+        table {
+            border: 1px solid black;
+            text-align: center;
+            border-collapse: collapse;
+        }
+        table thead th {
+            border: 1px solid black;
+        }
+        table tbody td {
+            border: 1px solid black;
+            padding: 6px 10px;
+        }
+		 /*
+		h3{font-size:22px;}
+		a{
+			color:#0000FF; 
+			text-decoration: underline;
+		}*/
+		a:HOVER{ 
+		font-weight:bold;
+		text-decoration: none;
+		cursor: pointer;
+		}
+        .bold{font-weight: bold}
+        .green{color:#00d20d}
+        .red{color:#ff0000}
+        .orange{color:#ff6600}
+        .bgdz{background-color: #FFFFCC;}
+        .bgdz{background-color: #FFFFCC;}
+        .dt-buttons{display: none;}
+    </style>
+</head>
+<!--遍历数组-->
+<body>
+
+<script type="text/javascript" language="javascript" src="/js/jquery.js"></script>
+<script type="text/javascript" language="javascript" src="/js/jquery.form.js"></script>
+
+<script type="text/javascript" language="javascript" src="/js/common.js?ng=20220219160143"></script>
+<script type="text/javascript" language="javascript" src="/js/api.js?ng=20220219160143"></script>
+
+
+<link rel="stylesheet" type="text/css" href="/css/basecss.css">
+
+
+<link rel="stylesheet" type="text/css" href="/css/buttons.dataTables.min.css">
+<link rel="stylesheet" type="text/css" href="/css/exportExcelbuttons.css">
+
+
+<script type="text/javascript" language="javascript"  src="/js/jquery.dataTables-1.10.7.min.js"></script>
+<script type="text/javascript" language="javascript" src="/js/e6/DTable.js"></script>
+ 
+
+	
+
+<script type="text/javascript" language="javascript" src="/js/buttons.html5.min.js"> </script>
+<script type="text/javascript" language="javascript" src="/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" language="javascript" src="/js/dataTables.buttons.min.js"></script>
+<script type="text/javascript" language="javascript" src="/js/jszip.min.js"></script>
+<script type="text/javascript" language="javascript" src="/js/buttons.html5.min.js"> </script>
+<script type="text/javascript" language="javascript" src="/js/jquery-dataTables-fnNameOrdering.js"></script>
+<script type="text/javascript" language="javascript" src="/js/jquery-dataTables-fnNoColumnsParams.js"></script>
+<script type="text/javascript" language="javascript" src="/js/jquery-dataTables-fnCounterColumns.js"></script>
+<script type="text/javascript" language="javascript" src="/js/jquery-dataTables-fnFakeRowspan.js"></script>
+
+
+
+
+<script type="text/javascript">
+
+function changeAddr() {
+	var addrs = '127.0.0.1:8080'    //--
+	return addrs;
+}
+function signIn(url) {//60.205.183.191:9098
+    window.open(url);
+}
+function bindLayerMouseOver(){};
+
+
+var showtime = function () {
+    var nowdate = new Date();
+    var year = nowdate.getFullYear(),
+
+        month = checkTime(nowdate.getMonth() + 1),
+
+        date = nowdate.getDate(),
+
+        day = nowdate.getDay(),
+
+        week = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"],
+
+        h = nowdate.getHours(),
+
+        m = nowdate.getMinutes(),
+
+        s = nowdate.getSeconds(),
+
+        h = checkTime(h),
+
+        m = checkTime(m),
+
+        s = checkTime(s);
+    return year + "-" + month + "-" + date + " " + h +":" + m + ":" + s;
+}
+
+var checkTime = function (i) {
+    if (i < 10) {
+        i = "0" + i;
+    }
+    return i;
+}
+
+var div = document.getElementById("showtime");
+
+setInterval (function() {
+
+	document.getElementById("showtime").innerHTML = showtime();
+
+}, 1000);  //反复执行函数
+
+</script>
+
+<table>
+    <tr style="border: 2px solid black; background-color: #CCC">
+        <td style="background-color: #FF9999"><a href="/gp/run?p=ztdx" target="_blank">启动自选监控</a></td>
+        <td style="background-color: #FF9999"><a href="/gp/run?p=all" target="_blank">启动全部个股监控</a></td>
+        <td style="background-color: #FF9999"><a href="/gp/run?p=hy" target="_blank">启动行业监控</a></td>
+        <td style="background-color: #FF9999"><a href="/gp/opt?key=all" target="_blank">停止跑数据</a></td>
+        <td style="background-color: #93D1FF"><a th:href="${'/gp/ztdxAjax?px=' + px + '&hpx=zdf'}">行业涨跌幅</a></td>
+        <td style="background-color: #93D1FF"><a th:href="${'/gp/ztdxAjax?px=' + px + '&hpx=lr'}">行业静流入</a></td>
+        <td style="background-color: #93D1FF"><a th:href="${'/gp/ztdxAjax?px=' + px + '&hpx=zdb'}">行业涨跌比</a></td>
+        <td style="background-color: #93D1FF"><a th:href="${'/gp/ztdxAjax?px=sort&hpx=' + hpx}">个股默认排序</a></td>
+        <td style="background-color: #93D1FF"><a th:href="${'/gp/ztdxAjax?px=cate&hpx=' + hpx}">个股分类排</a></td>
+        <td style="background-color: #93D1FF"><a th:href="${'/gp/ztdxAjax?px=15d&hpx=' + hpx}">个股15天板</a></td>
+        <td style="background-color: #93D1FF"><a th:href="${'/gp/ztdxAjax?px=zkb&hpx=' + hpx}">个股赚亏比</a></td>
+        <td class="red"><h2 style="border:0px;margin:0px;padding:0px;" id="showtime" th:text="${time}">&nbsp;</h2></td>
+    </tr>
+</table>
+<br/>
+
+<table>
+    <tr style="border: 2px solid black; background-color: #EFEFEF">
+        <td>
+            <img src="http://image.sinajs.cn/newchart/min/n/sh000001.gif" style="width: 270px;">
+        </td>
+        <td>
+            <img src="http://image.sinajs.cn/newchart/min/n/sz399001.gif" style="width: 270px;">
+        </td>
+        <td>
+            <img src="http://image.sinajs.cn/newchart/min/n/sh000016.gif" style="width: 270px;"> 
+        </td>
+        <td>
+            <img src="http://image.sinajs.cn/newchart/min/n/sh000852.gif" style="width: 270px;">
+        </td>
+        <td>
+            <img src="http://image.sinajs.cn/newchart/min/n/sh000046.gif" style="width: 270px;">
+        </td>
+    </tr>
+</table>
+<br/>
+
+<!-- 监控  -->
+<table>
+	<!-- 自选监控 -->
+	
+	<tr>
+	
+	<td style="vertical-align:top; text-align: left; ">
+		<h3 style="margin:0px; padding:0px;" class="blue" id="02">
+		大盘评级（
+		<span id="p0"  class="red" ></span>
+		）
+		涨跌分布（
+		上涨：<span id="p1"  class="red" ></span>只
+		下跌：<span id="p2"  class="green" ></span> 
+		）
+		涨跌停（
+		上涨：<span id="p3"  class="red" ></span>
+		下跌：<span id="p4"  class="green" ></span>
+		）
+		</h3>
+	</td>
+	
+	<td style="vertical-align:top; text-align: left;">
+		<h3 style="margin:0px; padding:0px;" class="blue" id="01">
+		
+		</h3>
+	</td>
+	
+	</tr>
+	
+	<tr>
+	
+	
+	
+	
+	<td style="vertical-align:top; text-align: left;">
+		<h3 style="margin:0px; padding:0px;" class="blue" id="h31">
+		自选监控#开盘（
+		总数：<span id="zxjkvo_zx_gknum"></span>，
+		高开比：<span id="zx_gkb"></span>，
+		均涨幅：<span   id="zx_jzf"></span>
+		）
+		</h3>
+	</td>
+	<td style="vertical-align:top; text-align: left; ">
+		<h3 style="margin:0px; padding:0px;" class="blue" id="h32">
+		实时（
+		涨跌比：<span style="font-size:14px;" id="b1"> </span><span id="b2"> </span>，
+		均涨幅：<span style="font-size:14px;" id="b3"> </span><span class="red" id="b4"> </span>，
+		赚亏比：<span class="blue" id="b5"> </span>
+		）
+		</h3>
+	</td>
+	
+
+	
+	</tr>
+	<!-- 涨停监控 -->
+	<tr>
+	 
+	 
+	 <td style="vertical-align:top; text-align: left;">
+		<h3 style="margin:0px; padding:0px;" class="blue" id="z40">
+		涨停监控#开盘（
+		总数：<span id="z41"></span>，
+		高开比：<span id="z42"></span>，
+		均涨幅：<span   id="z43"></span>
+		）
+		</h3>
+	</td>
+	<td style="vertical-align:top; text-align: left; ">
+		<h3 style="margin:0px; padding:0px;" class="blue" id="z32">
+		实时（
+		涨跌比：<span style="font-size:14px;" id="z1"></span><span id="z2">%</span>，
+		均涨幅：<span style="font-size:14px;" id="z3"></span><span class="red" id="z4">%</span>，
+		赚亏比：<span class="blue" id="z5">%</span>
+		）
+		</h3>
+	</td>
+	
+	</tr>
+	
+	
+	<!-- 跌停监控 -->
+	<tr>
+	  <td style="vertical-align:top; text-align: left;">
+		<h3 style="margin:0px; padding:0px;" class="blue" id="t40">
+		跌停监控#开盘（
+		总数：<span id="t41"></span>，
+		高开比：<span id="t42"></span>，
+		均涨幅：<span   id="t43"></span>
+		）
+		</h3>
+	</td>
+	<td style="vertical-align:top; text-align: left; ">
+		<h3 style="margin:0px; padding:0px;" class="blue" id="t0">
+		实时（
+		涨跌比：<span style="font-size:14px;" id="t1"></span><span id="t2">%</span>，
+		均涨幅：<span style="font-size:14px;" id="t3"></span><span class="blue" id="t4">%</span>，
+		赚亏比：<span class="blue" id="t5">%</span>
+		）
+		</h3>
+	</td>
+	</tr>
+	<!-- 高板监控 -->
+	<tr>
+	<tr>
+	  <td style="vertical-align:top; text-align: left;">
+		<h3 style="margin:0px; padding:0px;" class="blue" id="g40">
+		高板监控#开盘（
+		总数：<span id="g41"></span>，
+		高开比：<span id="g42"></span>，
+		均涨幅：<span   id="g43"></span>
+		）
+		</h3>
+	</td>
+	<td style="vertical-align:top; text-align: left; ">
+		<h3 style="margin:0px; padding:0px;" class="blue" id="g0">
+		实时（
+		涨跌比：<span style="font-size:14px;" id="g1"></span><span id="g2">%</span>，
+		均涨幅：<span style="font-size:14px;" id="g3"></span><span class="blue" id="g4">%</span>，
+		赚亏比：<span class="blue" id="g5">%</span>
+		）
+		</h3>
+	</td>
+	</tr>
+	
+	
+	<script type="text/javascript">
+</script>
+
+
+
+	<!-- 行业监控 -->
+	<tr>
+	<tr>
+	  <td style="vertical-align:top; text-align: left;">
+		<h3 style="margin:0px; padding:0px;" class="blue" id="r40">
+		行业监控#开盘（
+		总数：<span id="r41"></span>，
+		高开比：<span id="r42"></span>，
+		均涨幅：<span   id="r43"></span>
+		）
+		</h3>
+	</td>
+	<td style="vertical-align:top; text-align: left; ">
+		<h3 style="margin:0px; padding:0px;" class="blue" id="r0">
+		实时（
+		涨跌比：<span style="font-size:14px;" id="r1"></span><span id="r2">%</span>，
+		均涨幅：<span style="font-size:14px;" id="r3"></span><span class="blue" id="r4">%</span>，
+		赚亏比：<span class="blue" id="r5">%</span>
+		）
+		</h3>
+	</td>
+	</tr>
+	
+	
+ 
+	
+</table>
+	
+<br/>
+<table>
+<tr>
+<td style="vertical-align:top; display:; ">
+
+
+
+
+<table id="tablehy" class="trclick display nowrap" cellspacing="0"   >
+		<thead>
+       <tr style="height:35px;">
+	         <th style="width:120px" >分类</th> 
+	        <th  >涨跌%</th>
+	        <th style="width:140px">涨涨跌数</th>
+	        
+        </tr>
+    </thead>
+  </table>
+
+ 
+
+</td>
+
+<td style="vertical-align:top; width:80%">
+
+<!-- 自选列表 --> 
+
+<table id="table" class="trclick display nowrap" cellspacing="0"  width="90%">
+		<thead>
+       <tr style="height:35px; background-color: #146aa2 ">
+	         <th >编码</th>
+	        <th style="width:120px" >名称</th>
+	        <th style="width:210px" orderBy="lightBox_s_s">分类</th>    
+	        <th style="width:85px;">标识</th> 
+	        
+	        <th>连板&15d</th>
+	          <th style="width:180px">封板</th>
+	          <th>涨筹码</th>
+	        <th>涨跌幅</th>
+	      
+	        
+	        <th>开涨跌</th>
+	      
+	        <th>赚亏比</th>
+	        
+	      <!--    <th>昨天涨跌</th>-->
+	        <th>评分</th>
+	          <th>计划操作</th>
+        </tr>
+    </thead>
+  </table>
+
+
+
+
+
+
+
+<h3>连续2天涨停列表</h3>
+<!-- 连板内容 -->
+
+
+<table id="table2d" class="trclick display nowrap" cellspacing="0"  width="72%" >
+		<thead>
+       <tr style="height:35px;">
+	        <th>编码</th> 
+	       <th style="width:120px" >名称</th>
+	        <th>分类</th>
+	        <th   >涨停情况</th>
+	        <th>涨跌幅</th>
+	        <th>开涨跌</th>
+	        <th>赚亏比</th>
+        </tr>
+    </thead>
+  </table>
+<!--              ----------------------------------------------------  ----------------------------------------------------  ---------------------------------------------------- -->
+
+
+<br/>
+<h3>昨天涨停列表</h3>
+<!-- 连板内容 -->
+<table style="float:;">
+    <tr style="background-color: #146aa2">
+        <td>编码</td>
+        <td>名称</td>
+        <td>分类</td>
+        <td>涨跌幅</td>
+        <td>开涨跌</td>
+        <td>赚亏比</td>
+    </tr>
+    <tr th:each="item, sta:${ztlist}" th:class="${item['kpzdf']}>=0?'':'bgdz'">
+        <td style="line-height:35px;"><a th:href="${'http://stockpage.10jqka.com.cn/'+ #strings.substring(item['cid'],2,8) + '/#refCountId=stockpage_5c3e9aef_93'}" target="_blank"><span th:text="${#strings.substring(item['cid'],2,8)}"></span></a></td>
+        <td th:text="${item['name']}"></td>
+        <td>
+            <span th:text="${item['cate']}"></span>
+        </td>
+        <td th:text="${item['zdf']} + '%'" th:class="${item['zdf']}>=0?'bold red':'bold green'"></td>
+        <td>
+        	<span th:text="${item['kpzdf']>0?item['kpzdf'] + '%':''}" th:class="${item['kpzdf']}>0?'bold red':''"></span>
+        	<span th:text="${item['kpzdf']==0.0?'0%':''}" th:class="${item['kpzdf']==0.0?'bold':''}"></span>
+        	<span th:text="${item['kpzdf']<0?item['kpzdf'] + '%':''}" th:class="${item['kpzdf']}<0?'bold green':''"></span>
+        
+        </td>
+        <td>
+        	<span th:text="${item['zkb']>0?item['zkb'] + '%':''}" th:class="${item['zkb']}>0?'bold red':''"></span>
+        	<span th:text="${item['zkb']==0.0?'-':''}"></span>
+        	<span th:text="${item['zkb']<0?item['zkb'] + '%':''}" th:class="${item['zkb']}<0?'bold green':''"></span>
+        </td>
+    </tr>
+</table>
+
+
+
+
+
+
+<br/>
+<h3>昨天跌停列表</h3>
+<!-- 连板内容 -->
+<table style="float:;">
+    <tr style="background-color: #146aa2">
+        <td>编码</td>
+        <td>名称</td>
+        <td>分类</td>
+        <td>涨跌幅</td>
+        <td>开涨跌</td>
+        <td>赚亏比</td>
+    </tr>
+    <tr th:each="item, sta:${dtlist}" th:class="${item['kpzdf']}>=0?'':'bgdz'">
+        <td style="line-height:35px;"><a th:href="${'http://stockpage.10jqka.com.cn/'+ #strings.substring(item['cid'],2,8) + '/#refCountId=stockpage_5c3e9aef_93'}" target="_blank"><span th:text="${#strings.substring(item['cid'],2,8)}"></span></a></td>
+        <td th:text="${item['name']}"></td>
+        <td>
+            <span th:text="${item['cate']}"></span>
+        </td>
+        <td th:text="${item['zdf']} + '%'" th:class="${item['zdf']}>=0?'bold red':'bold green'"></td>
+        <td>
+        	<span th:text="${item['kpzdf']>0?item['kpzdf'] + '%':''}" th:class="${item['kpzdf']}>0?'bold red':''"></span>
+        	<span th:text="${item['kpzdf']==0.0?'0%':''}" th:class="${item['kpzdf']==0.0?'bold':''}"></span>
+        	<span th:text="${item['kpzdf']<0?item['kpzdf'] + '%':''}" th:class="${item['kpzdf']}<0?'bold green':''"></span>
+        
+        </td>
+        <td>
+        	<span th:text="${item['zkb']>0?item['zkb'] + '%':''}" th:class="${item['zkb']}>0?'bold red':''"></span>
+        	<span th:text="${item['zkb']==0.0?'-':''}"></span>
+        	<span th:text="${item['zkb']<0?item['zkb'] + '%':''}" th:class="${item['zkb']}<0?'bold green':''"></span>
+        </td>
+    </tr>
+</table>
+
+<br/>
+<h3>高板列表</h3>
+<!-- 连板内容 -->
+<table style="float:;">
+    <tr style="background-color: #146aa2">
+        <td>编码</td>
+        <td>名称</td>
+        <td>分类</td>
+        <td>涨跌幅</td>
+        <td>开涨跌</td>
+        <td>赚亏比</td>
+    </tr>
+    <tr th:each="item, sta:${gblist}" th:class="${item['kpzdf']}>=0?'':'bgdz'">
+        <td style="line-height:35px;"><a th:href="${'http://stockpage.10jqka.com.cn/'+ #strings.substring(item['cid'],2,8) + '/#refCountId=stockpage_5c3e9aef_93'}" target="_blank"><span th:text="${#strings.substring(item['cid'],2,8)}"></span></a></td>
+        <td th:text="${item['name']}"></td>
+        <td>
+            <span th:text="${item['cate']}"></span>
+        </td>
+        <td th:text="${item['zdf']} + '%'" th:class="${item['zdf']}>=0?'bold red':'bold green'"></td>
+        <td>
+        	<span th:text="${item['kpzdf']>0?item['kpzdf'] + '%':''}" th:class="${item['kpzdf']}>0?'bold red':''"></span>
+        	<span th:text="${item['kpzdf']==0.0?'0%':''}" th:class="${item['kpzdf']==0.0?'bold':''}"></span>
+        	<span th:text="${item['kpzdf']<0?item['kpzdf'] + '%':''}" th:class="${item['kpzdf']}<0?'bold green':''"></span>
+        
+        </td>
+        <td>
+        	<span th:text="${item['zkb']>0?item['zkb'] + '%':''}" th:class="${item['zkb']}>0?'bold red':''"></span>
+        	<span th:text="${item['zkb']==0.0?'-':''}"></span>
+        	<span th:text="${item['zkb']<0?item['zkb'] + '%':''}" th:class="${item['zkb']}<0?'bold green':''"></span>
+        </td>
+    </tr>
+</table>
+
+<br/>
+<h3>行业列表</h3>
+<table style="float:;">
+    <tr style="background-color: #146aa2">
+        <td>编码</td>
+        <td>名称</td>
+        <td>分类</td>
+        <td>涨跌幅</td>
+        <td>开涨跌</td>
+        <td>赚亏比</td>
+    </tr>
+    <tr th:each="item, sta:${hygplist}" th:class="${item['kpzdf']}>=0?'':'bgdz'">
+        <td style="line-height:35px;"><a th:href="${'http://stockpage.10jqka.com.cn/'+ #strings.substring(item['cid'],2,8) + '/#refCountId=stockpage_5c3e9aef_93'}" target="_blank"><span th:text="${#strings.substring(item['cid'],2,8)}"></span></a></td>
+        <td th:text="${item['name']}"></td>
+        <td>
+            <span th:text="${item['cate']}"></span>
+        </td>
+        <td th:text="${item['zdf']} + '%'" th:class="${item['zdf']}>=0?'bold red':'bold green'"></td>
+        <td>
+        	<span th:text="${item['kpzdf']>0?item['kpzdf'] + '%':''}" th:class="${item['kpzdf']}>0?'bold red':''"></span>
+        	<span th:text="${item['kpzdf']==0.0?'0%':''}" th:class="${item['kpzdf']==0.0?'bold':''}"></span>
+        	<span th:text="${item['kpzdf']<0?item['kpzdf'] + '%':''}" th:class="${item['kpzdf']}<0?'bold green':''"></span>
+        
+        </td>
+        <td>
+        	<span th:text="${item['zkb']>0?item['zkb'] + '%':''}" th:class="${item['zkb']}>0?'bold red':''"></span>
+        	<span th:text="${item['zkb']==0.0?'-':''}"></span>
+        	<span th:text="${item['zkb']<0?item['zkb'] + '%':''}" th:class="${item['zkb']}<0?'bold green':''"></span>
+        </td>
+    </tr>
+</table>
+
+
+</td>
+</tr>
+</table>
+<script type="text/javascript" language="javascript" src="/js/e6/gpzxTable.js?16452577038019"></script>
+<script type="text/javascript" language="javascript" src="/js/e6/gphyTable.js?16452577038019"></script>
+<script type="text/javascript" language="javascript" src="/js/e6/gpz2dztable.js?16452577038019"></script>
+<script type="text/javascript" language="javascript" src="/js/e6/10jqka.js?16452577038019"></script>
+
+
+
+</body>
+</html>
