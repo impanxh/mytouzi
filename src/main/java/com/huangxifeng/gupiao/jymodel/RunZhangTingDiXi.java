@@ -20,7 +20,6 @@ import com.huangxifeng.core.utils.StringPool;
 import com.huangxifeng.core.utils.ValidateUtil;
 import com.huangxifeng.gupiao.run.RunIndustryMonitorSpider;
 import com.huangxifeng.gupiao.run.RunUtils;
-import com.huangxifeng.gupiao.vo.GuPiaoInfoVO;
 import com.huangxifeng.gupiao.vo.ZhangTingDiXiVO;
 
 public class RunZhangTingDiXi {
@@ -254,55 +253,96 @@ public class RunZhangTingDiXi {
 		return isrun;
 	}
 
-	public static void runZtDx() {
+	public static void runZtDx()
+	{
 		
 		try {
 			
-			String fileurl = Config.DATA_DIR + "/data/超短低吸.xlsx";
-
-			XSSFWorkbook xssfWorkbook = new XSSFWorkbook(new FileInputStream(fileurl));
-			//int sheets = xssfWorkbook.getNumberOfSheets();
-
+			boolean flag = false;
 			StringBuffer s_cidsBuf = new StringBuffer();
 			
-			// 读取工作表
-			XSSFSheet sheet = xssfWorkbook.getSheetAt(0);
-
-			// 获取最后一行的num，即总行数。此处从0开始计数
-			int maxRow = sheet.getLastRowNum();
-			System.out.println("总行数为：" + (maxRow + 1));
-
-			for (int j = 1; j <= maxRow; j++)
+			System.out.println("=========== 读取 自选低吸 列表  ===========");
+			
+			if(flag)
 			{
-				ZhangTingDiXiVO vo = new ZhangTingDiXiVO();
-				Row row = sheet.getRow(j);
-				if(row.getLastCellNum() < 0)
+				String fileurl = Config.DATA_DIR + "/data/超短低吸.xlsx";
+
+				XSSFWorkbook xssfWorkbook = new XSSFWorkbook(new FileInputStream(fileurl));
+				//int sheets = xssfWorkbook.getNumberOfSheets();
+				
+				// 读取工作表
+				XSSFSheet sheet = xssfWorkbook.getSheetAt(0);
+
+				// 获取最后一行的num，即总行数。此处从0开始计数
+				int maxRow = sheet.getLastRowNum();
+				System.out.println("总行数为：" + (maxRow + 1));
+
+				for (int j = 1; j <= maxRow; j++)
 				{
-					continue;
+					ZhangTingDiXiVO vo = new ZhangTingDiXiVO();
+					Row row = sheet.getRow(j);
+					if(row.getLastCellNum() < 0)
+					{
+						continue;
+					}
+					vo.setCid(RunUtils.getCId(row.getCell(0).toString())); // Code
+					vo.setName(row.getCell(1).toString());// 名称
+					vo.setCate(row.getCell(2).toString());// 分类
+					vo.setBsstr(row.getCell(3).toString()); //标识
+					vo.setLbstr(Double.valueOf(row.getCell(4).toString()).intValue()); // 连板
+					vo.setBan15d(Double.valueOf(row.getCell(5).toString()).intValue()); //15天涨停
+					vo.setFbstr(row.getCell(6).toString()); //昨封板
+					vo.setCmstr(row.getCell(7).toString());
+					vo.setLiang15d(row.getCell(8).toString() + "亿");
+					vo.setJxz(row.getCell(9).toString());
+					vo.setZtzd(row.getCell(10).toString());
+					vo.setScore(Double.valueOf(row.getCell(11).toString()).intValue());
+					vo.setCzstr(row.getCell(12).toString()); // 操作
+					vo.setSort(j+1);
+					s_cidsBuf.append(vo.getCid()).append(",");
+					System.out.println(vo.toString());
+					map.put(vo.getCid(), vo);
 				}
-				vo.setCid(RunUtils.getCId(row.getCell(0).toString())); // Code
-				vo.setName(row.getCell(1).toString());// 名称
-				vo.setCate(row.getCell(2).toString());// 分类
-				vo.setBsstr(row.getCell(3).toString()); //标识
-				vo.setLbstr(Double.valueOf(row.getCell(4).toString()).intValue()); // 连板
-				vo.setBan15d(Double.valueOf(row.getCell(5).toString()).intValue()); //15天涨停
-				vo.setFbstr(row.getCell(6).toString()); //昨封板
-				vo.setCmstr(row.getCell(7).toString());
-				vo.setLiang15d(row.getCell(8).toString() + "亿");
-				vo.setJxz(row.getCell(9).toString());
-				vo.setZtzd(row.getCell(10).toString());
-				vo.setScore(Double.valueOf(row.getCell(11).toString()).intValue());
-				vo.setCzstr(row.getCell(12).toString()); // 操作
-				vo.setSort(j+1);
-				s_cidsBuf.append(vo.getCid()).append(",");
-				System.out.println(vo.toString());
-				map.put(vo.getCid(), vo);
+				xssfWorkbook.close();
+				
+			} else {
+				
+				String fileurl = Config.DATA_DIR + "/data/run/dxgp.txt";
+				List<String> list = FileUtil.readToStringList(fileurl, StringPool.UTF_8);
+				System.out.println("总行数为：" + list.size());
+				
+				for (int i = 0; i < list.size(); i++)
+				{
+					String txt = list.get(i);
+					if(txt.contains("编号"))
+					{
+						continue;
+					}
+					
+					String[] sps = txt.split("#");
+					
+					ZhangTingDiXiVO vo = new ZhangTingDiXiVO();
+					vo.setCid(sps[0]); // Code
+					vo.setName(sps[1]);// 名称
+					vo.setCate(sps[2]);// 分类
+					vo.setBsstr(sps[3]); //标识
+					vo.setLbstr(Integer.valueOf(sps[4])); // 连板
+					vo.setBan15d(Integer.valueOf(sps[5])); //15天涨停
+					vo.setFbstr(sps[6]); //昨封板
+					vo.setCmstr(sps[7]);
+					vo.setLiang15d(sps[8] + "亿");
+					vo.setJxz(sps[9]);
+					vo.setZtzd(sps[10]);
+					vo.setScore(Integer.valueOf(sps[11]));
+					vo.setCzstr(sps[12]); // 操作
+					vo.setSort(i+1);
+					s_cidsBuf.append(vo.getCid()).append(",");
+					System.out.println(vo.toString());
+					map.put(vo.getCid(), vo);
+				}
 			}
 
 			cids = s_cidsBuf.substring(0, s_cidsBuf.length() - 1);
-			
-			xssfWorkbook.close();
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
