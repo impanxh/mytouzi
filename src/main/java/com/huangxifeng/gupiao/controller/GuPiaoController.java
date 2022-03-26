@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +19,7 @@ import com.huangxifeng.gupiao.jymodel.RunJianKong;
 import com.huangxifeng.gupiao.jymodel.RunZhangTingDiXi;
 import com.huangxifeng.gupiao.jymodel.RunZhuiZhangTing;
 import com.huangxifeng.gupiao.run.RunIndustryMonitorSpider;
+import com.huangxifeng.gupiao.service.NotifyService;
 import com.huangxifeng.gupiao.util.TableRequest;
 import com.huangxifeng.gupiao.vo.HangYeVO;
 import com.huangxifeng.gupiao.vo.JianKongVO;
@@ -220,7 +223,14 @@ public class GuPiaoController {
 
 		// 涨停低吸
 		if (p.equals("ztdx")) {
+			
 			RunZhangTingDiXi.run();
+			
+		}
+		
+		//msg
+		if (p.equals("msg")) {
+			notifyService.analyDataAndSendMsg();
 		}
 
 		// 所以个股
@@ -268,5 +278,8 @@ public class GuPiaoController {
 
 		return "gupiao/opt";
 	}
+	@Autowired
+	@Lazy
+	NotifyService notifyService;
 
 }
