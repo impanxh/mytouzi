@@ -1,6 +1,7 @@
 package com.huangxifeng.gupiao.jymodel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -117,8 +118,11 @@ public class RunJianKong
 			map.put(vo.getCid(), vo);
 			
 			if(type.equals(JianKongVO.Type.ZT2D_LIST)) {
+				
 				String[] array = txt.split("#");
+				System.out.println(Arrays.asList(array));
 				vo.setJxz(array[4]);
+				vo.setGnList(array[6]);
 			}
 		}
 		System.out.println(title + "一共读取 " + list.size() + " 条数据");
@@ -248,10 +252,10 @@ public class RunJianKong
 		}
 
 		init();
-
+		System.out.println("---------------------隔1秒跑一次监控个股-------------------------");
 		while (isrun) {
 
-			System.out.println("---------------------隔1秒跑一次监控个股-------------------------");
+			
 
 			try {
 
@@ -387,6 +391,10 @@ public class RunJianKong
 			} catch (Exception e) {
 				System.out.println("[" + cids + "]");
 				e.printStackTrace();
+			}
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
 			}
 		}
 	}

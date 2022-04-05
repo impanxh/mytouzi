@@ -2,25 +2,29 @@ package com.huangxifeng.gupiao;
 
 import java.util.TimeZone;
 
+import org.apache.catalina.connector.Connector;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.embedded.tomcat.TomcatConnectorCustomizer;
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.EnableGroovy;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-
 @EnableGroovy
 @SpringBootApplication
 public class GuPiaoApplication extends SpringBootServletInitializer implements WebMvcConfigurer {
-	
+
 	@Override
-    protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
-          // 注意这里要指向原先用main方法执行的App启动类
-         return builder.sources(GuPiaoApplication.class);
-     }
-	
+	protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+		// 注意这里要指向原先用main方法执行的App启动类
+		return builder.sources(GuPiaoApplication.class);
+	}
+
 	/**
 	 * 默认时区（亚洲/上海）
 	 */
@@ -118,20 +122,39 @@ public class GuPiaoApplication extends SpringBootServletInitializer implements W
 //		// 静态资源
 //		registry.addResourceHandler("/static/**").addResourceLocations("classpath:/static/");
 //	}
-	
+
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
 		System.out.println("---");
-		// Swagger接口文档 
+		// Swagger接口文档
 		registry.addResourceHandler("swagger-ui.html").addResourceLocations("classpath:/META-INF/resources/");
 		registry.addResourceHandler("/webjars*").addResourceLocations("classpath:/META-INF/resources/webjars/");
 		// 静态资源
 		registry.addResourceHandler("/static/**").addResourceLocations("classpath:/static/");
-		//如果是linux 发布 去掉classPath:
-		//registry.addResourceHandler("/js/**").addResourceLocations("classpath:/js/");
-		//registry.addResourceHandler("/css/**").addResourceLocations("classpath:/css/");   
-		
-		registry.addResourceHandler("/js/**").addResourceLocations("/js/");
-		registry.addResourceHandler("/css/**").addResourceLocations("/css/");   
+		// 如果是linux 发布 去掉classPath:
+
+		String osName = System.getProperty("os.name");
+		System.out.println(osName);
+		if (osName.startsWith("Mac OS") || osName.startsWith("Windows")) {
+			registry.addResourceHandler("/js/**").addResourceLocations("classpath:/js/");
+			registry.addResourceHandler("/css/**").addResourceLocations("classpath:/css/");
+		} else {
+			registry.addResourceHandler("/js/**").addResourceLocations("/js/");
+			registry.addResourceHandler("/css/**").addResourceLocations("/css/");
+			// unix or linux
+
+		}
+	}
+
+	@Bean
+	public ConfigurableServletWebServerFactory webServerFactory() {
+		TomcatServletWebServerFactory factory = new TomcatServletWebServerFactory();
+		factory.addConnectorCustomizers(new TomcatConnectorCustomizer() {
+			@Override
+			public void customize(Connector connector) {
+				connector.setProperty("relaxedQueryChars", "[]");
+			}
+		});
+		return factory;
 	}
 
 }

@@ -31,7 +31,7 @@
     { "data": "cid", "render": function render(data, type, row, meta) {
 
             var c2 = data.substring(2, 8);
-            var url = 'http://stockpage.10jqka.com.cn/' + c2 + '/#refCountId=stockpage_5c3e9aef_93&code='+data;
+            var url = 'http://stockpage.10jqka.com.cn/' + c2 + '/#refCountId=stockpage_5c3e9aef_93';
             var c = '<a class="table-link" target="_blank" onclick="signIn(\'' + url + '\');"> ' + c2 + ' </a>';
             return c;
         } }, { "data": "name" }, { "data": "cate", "render": function render(data, type, row, meta) {
@@ -46,6 +46,25 @@
         } }, 
         { "data": "zkb", "render": function render(data, type, row, meta) {
             return data > 0 ? " <span class='bold red'>" + data + "%</span> " : data == 0 ? "-" : " <span class='bold green'>" + data + "%</span>  ";
+        } } ,
+         { "data": "gnList", "render": function render(data, type, row, meta) {
+         		if( data =="-" || data ==""){
+         			return "";
+         			
+         		}else{
+	         		var rows  = data.split(",");
+	         		var r = [];
+	         		var len = rows.length ; 
+	         		// if(len>3)len=3;
+         		   for(i = 0; i <len; i++){  
+         		      var name = rows[i].split(":")[1];
+         		   	   r.push(name)
+         		   } 
+         		   return r.join(",");
+         		
+         		}
+         		
+           	 
         } } 
     
     ];
@@ -65,7 +84,7 @@
             "filter[hpx]": getParamFromUrl("hpx")
 
         };
-    }).withAutoScrollY().withColumns(coluns).withExcelExport(true).withCountTd(false).withEnableSort(true); // is excelport
+    }).withAutoScrollY().withColumns(coluns).withExcelExport(true).withCountTd(false).withEnableSort(false); // is excelport
     ta.dom = '<"#toolbar">t';
     
     ta.withCreatedRow(function (row, data, index) {

@@ -15,3 +15,6 @@ src/main/resources/config/config.properties
 src/main/resources/config/config.properties
 src/main/java/com/huangxifeng/gupiao/.DS_Store
 pom.xml
+src/main/.DS_Store
+src/main/resources/.DS_Store
+bin/

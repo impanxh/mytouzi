@@ -476,7 +476,7 @@ public class RunDatas {
 				// continue;
 				// }
 
-				System.out.println(vo.toString());
+				//System.out.println(vo.toString());
 				num++;
 			}
 
@@ -2312,7 +2312,7 @@ public class RunDatas {
 			for (int i = 0; i < newlist.size(); i++)
 			{
 				ZhangTingDiXiVO dxvo = newlist.get(i);
-				System.out.println(dxvo.toString());
+				//System.out.println(dxvo.toString());
 				strbuf.append(dxvo.toString()).append("\n");
 			}
 			

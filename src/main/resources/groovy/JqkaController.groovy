@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.huangxifeng.gupiao.service.NotifyService
 import com.huangxifeng.gupiao.util.HtmlUtil
+import com.huangxifeng.gupiao.util.TableRequest
 
 @Controller
 @RequestMapping(value = "/10jqka")
@@ -50,5 +51,12 @@ public class JqkaController {
 		return notifyService.getStockDetailResult();
 	}
 	
+	
+	
+	@RequestMapping(value = "/queryDataFromCommand")
+	@ResponseBody
+	public def lianghuaResult(TableRequest req) {
+		return notifyService.queryDataFromCommand(req);
+	}
 	
 }

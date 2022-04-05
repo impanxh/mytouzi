@@ -186,7 +186,7 @@ public class RunIndustryMonitorSpider {
 			}
 
 			try {
-				System.out.println("-- 行业采集 5 秒钟跑一次 --");
+				//System.out.println("-- 行业采集 5 秒钟跑一次 --");
 				Thread.sleep(3000);
 			} catch (Exception e) {
 				e.printStackTrace();

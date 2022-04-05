@@ -18,6 +18,7 @@ public class JianKongVO extends GuPiaoBaseVO
 	String liang15d = "-"; // 15天量
 	Integer ban15d  = 0;   // 15天涨停量
 	String jxz      = "";  // 均线值说明
+	String gnList  = "";
 	
 	public static class Type
 	{	public static String ZT2D_LIST = "ZT2D_LIST";
@@ -137,6 +138,14 @@ public class JianKongVO extends GuPiaoBaseVO
 
 	public void setJxz(String jxz) {
 		this.jxz = jxz;
+	}
+
+	public String getGnList() {
+		return gnList;
+	}
+
+	public void setGnList(String gnList) {
+		this.gnList = gnList;
 	}
 
 }

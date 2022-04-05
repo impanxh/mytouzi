@@ -1,3 +1,4 @@
+var gpGnAlertString = {};
 (function (global, factory) {
     if (typeof define === "function" && define.amd) {
         define(['DTable'], factory);
@@ -26,10 +27,10 @@
     role = {};
     //
 
-    var coluns = [{ "data": "cid", "render": function render(data, type, row, meta) { 
+    var coluns = [{ "data": "cid", "render": function render(data, type, row, meta) {
 
             var c2 = data.substring(2, 8);
-            var url = 'http://stockpage.10jqka.com.cn/' + c2 + '/#refCountId=stockpage_5c3e9aef_93&code='+data;
+            var url = 'http://stockpage.10jqka.com.cn/' + c2 + '/#refCountId=stockpage_5c3e9aef_93';
             var c = '<a class="table-link" target="_blank" onclick="signIn(\'' + url + '\');"> ' + c2 + ' </a>';
             return c;
         } }, { "data": "name" }, { "data": "cate", "render": function render(data, type, row, meta) {
@@ -69,7 +70,68 @@
         //    return data == "昨涨" ? " <span class='bold red'>" + data + "</span> " : data;
        // } },
         
-         { "data": "score" }, { "data": "czstr" }];
+         { "data": "score" }, { "data": "czstr" },
+          { "data": "cje", "render": function render(data, type, row, meta) {
+         		if( data =="-" || data ==""){
+         			return "";
+         			
+         		}else{
+	         		var rows  = data.split(",");
+	         		var r = [];
+	         		var shorN = '';
+	         		var output = '';
+         		     for(i = 0; i < rows.length; i++){
+         		      var pair = rows[i].split(":");
+         		      var name = pair[1];
+         		      var code = pair[0]
+         		      	
+         		      	var pcode = $.trim(code) ; 
+         		      	var json  = gnCache[pcode];
+         		      	if(isNotNull(json)){
+         		      		 r.push(json); 
+         		      	}
+         		      	 r.sort(function(a,b){
+					            if(a['199112']>b['199112']) return -1 ;
+					            if(a['199112']<b['199112']) return 1 ;
+					            return 0 ;
+					     }) ;
+         		   } 
+         		   
+         		     if(r.length > 0 ){
+					     	shorN = r[0].platename;   
+					     	  for(var w = 0; w < r.length; w++){
+					     	  	var obj = r[w];
+					     	  	var _cid = $.trim(obj.cid) ; 
+					     	  	var  setDefault = '&nbsp;&nbsp;&nbsp;'+ '<a class="table-link" target="_blank" onclick="setGpGnDefault(\'' + _cid + "','" + row.name     + '\');">设置默认显示</a>';
+					     	  	
+					     	   output += '&nbsp;&nbsp; '
+					     	  	 + '&nbsp;<a class="table-link" target="_blank" onclick="g2(\'' +_cid  + '\')";>'
+					     	    + obj.platename + "&nbsp;&nbsp;["+obj['199112']+"]" 
+					     	    + "&nbsp;&nbsp;"+obj['zjjlr']
+					     	    +  setDefault  
+					     	    
+					     	    + '</a><br>';
+					     	  }    
+					  }
+					 if(shorN != '' && shorN.length > 4){
+         		      		shorN = shorN.substring(0, 4);
+         		     }
+         		      if(row.hsl!=''){
+         		        var pair = row.hsl.split("_");
+         		      	var json  = gnCache[pair[1]];
+         		      	if(isNotNull(json)){
+         		      	  shorN = json.platename
+         		      	} 
+         		     }
+         		     gpGnAlertString[row.cid] =  output;
+         		   //console.log(output);
+         		   
+         		   return  '<a class="table-link" target="_blank" onclick="msgGn(\'' + row.cid + "','" + row.name     + '\');"> ' + shorN + '</a>';
+         		}
+         		
+           	 
+        } } 
+         ];
 
     var ajaxCallback = function ajaxCallback(json) {
         json.recordsTotal = json.length;
@@ -79,6 +141,8 @@
     var ta = new _DTable.DTable("table").withiDisplayLength(30).withSort([[2, "desc"]], [1, 0]).preDrawCallback(tooblar, function () {//set tooblar and run fuction
     }).preAjaxReduce(ajaxCallback).preUrl('/gp/ztdx-zx').withAjax("codegen", function () {
         //filter
+        
+         // console.log(gnCache)
         var st = $('#st').val();
         return {
             "filter[year]": $('#type_s1').val(),
@@ -87,7 +151,7 @@
             "filter[hpx]": getParamFromUrl("hpx")
 
         };
-    }).withAutoScrollY().withColumns(coluns).withExcelExport(true).withCountTd(false).withEnableSort(true); // is excelport
+    }).withAutoScrollY().withColumns(coluns).withExcelExport(true).withCountTd(false).withEnableSort(false); // is excelport
     ta.dom = '<"#toolbar">Bfrt';
    	ta.withCreatedRow(function (row, data, index) {
         if (data.kpzdb < 0) {

@@ -1,3 +1,5 @@
+var gnCache = {};
+
 (function (global, factory) {
     if (typeof define === "function" && define.amd) {
         define(['DTable'], factory);
@@ -26,37 +28,32 @@
     role = {};
     //
 
-    var coluns = [
-    
-    { "data": "cid", "render": function render(data, type, row, meta) {
-
-            var c2 = data.substring(2, 8);
-            var url = 'http://stockpage.10jqka.com.cn/' + c2 + '/#refCountId=stockpage_5c3e9aef_93&code='+data;
-            var c = '<a class="table-link" target="_blank" onclick="signIn(\'' + url + '\');"> ' + c2 + ' </a>';
+    var coluns = [{ "data": "cid", "render": function render(data, type, row, meta) {
+            var url = 'http://q.10jqka.com.cn/gn/detail/code/' + data + '/';
+            var c = '<a class="table-link" target="_blank" onclick="signIn(\'' + url + '\');"> ' + row.platename + ' </a>';
             return c;
-        } }, { "data": "name" }, { "data": "cate", "render": function render(data, type, row, meta) {
-             return data;
-       } },{ "data": "jxz" },
-         { "data": "zdf", "render": function render(data, type, row, meta) {
-            data = parseFloat(data);
+        } }, { "data": "199112", "render": function render(data, type, row, meta) {
             return data > 0 ? " <span class='bold red'>" + data + "%</span> " : data == 0 ? "0%" : " <span class='bold green'>" + data + "%</span>  ";
-        } },
-        { "data": "kpzdf", "render": function render(data, type, row, meta) {
-            return data > 0 ? " <span class='bold red'>" + data + "%</span> " : data == 0 ? "-" : " <span class='bold green'>" + data + "%</span>  ";
-        } }, 
-        { "data": "zkb", "render": function render(data, type, row, meta) {
-            return data > 0 ? " <span class='bold red'>" + data + "%</span> " : data == 0 ? "-" : " <span class='bold green'>" + data + "%</span>  ";
-        } } 
-    
-    ];
+        } }, { "data": "zjjlr", "render": function render(data, type, row, meta) {
+            var a = data > 0 ? " <span class='bold red'>" + data+ "</span> " : data == 0 ? "0" : " <span class='bold green'>" + data + "</span>  ";
+            return a  
+        } }];
 
     var ajaxCallback = function ajaxCallback(json) {
         json.recordsTotal = json.length;
         json.recordsFiltered = json.length;
+        var p1 ={}
+        for(i = 0; i < json.length; i++){
+    		  var pair = json[i] 
+             p1[ pair['cid'] ] = pair; 
+            
+  	 	} 
+  	 	gnCache = p1;
+  	 	//console.log(gnCache)
         return json;
     };
-    var ta = new _DTable.DTable("table2d").withiDisplayLength(30).withSort([[2, "desc"]], [1, 0]).preDrawCallback(tooblar, function () {//set tooblar and run fuction
-    }).preAjaxReduce(ajaxCallback).preUrl('/gp/ztdx-2dy').withAjax("codegen", function () {
+    var ta = new _DTable.DTable("tablehy").withiDisplayLength(30).withSort([[1, "desc"]], [ 0]).preDrawCallback(tooblar, function () {//set tooblar and run fuction
+    }).preAjaxReduce(ajaxCallback).preUrl('/10jqka/queryDataFromCommand?filter[cmd]=gnSortedList').withAjax("codegen", function () {
         //filter
         var st = $('#st').val();
         return {
@@ -67,14 +64,6 @@
         };
     }).withAutoScrollY().withColumns(coluns).withExcelExport(true).withCountTd(false).withEnableSort(true); // is excelport
     ta.dom = '<"#toolbar">t';
-    
-    ta.withCreatedRow(function (row, data, index) {
-        if (data.kpzdf < 0) {
-            $('td', row).css('background-color', '#FFFFCC');
-        }
-    })
-    
-    
     ta.withInitComplete(function () {
         //set initcomplete
         $('#kpi_s,#type_s1').change(function () {

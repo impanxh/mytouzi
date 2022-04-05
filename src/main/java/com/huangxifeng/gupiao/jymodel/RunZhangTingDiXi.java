@@ -258,18 +258,18 @@ public class RunZhangTingDiXi {
 		
 		try {
 			
-			boolean flag = false;
+			boolean flag = true;
 			StringBuffer s_cidsBuf = new StringBuffer();
 			
 			System.out.println("=========== 读取 自选低吸 列表  ===========");
-			
+			Map<String,String> gnMap  = RunUtils.getAllGnList();
 			if(flag)
 			{
 				String fileurl = Config.DATA_DIR + "/data/超短低吸.xlsx";
 
 				XSSFWorkbook xssfWorkbook = new XSSFWorkbook(new FileInputStream(fileurl));
 				//int sheets = xssfWorkbook.getNumberOfSheets();
-				
+			
 				// 读取工作表
 				XSSFSheet sheet = xssfWorkbook.getSheetAt(0);
 
@@ -299,6 +299,8 @@ public class RunZhangTingDiXi {
 					vo.setScore(Double.valueOf(row.getCell(11).toString()).intValue());
 					vo.setCzstr(row.getCell(12).toString()); // 操作
 					vo.setSort(j+1);
+					
+					vo.setCje((gnMap.containsKey(vo.getName()) ?gnMap.get(vo.getName()) :"-") );
 					s_cidsBuf.append(vo.getCid()).append(",");
 					System.out.println(vo.toString());
 					map.put(vo.getCid(), vo);
@@ -338,6 +340,12 @@ public class RunZhangTingDiXi {
 					vo.setSort(i+1);
 					s_cidsBuf.append(vo.getCid()).append(",");
 					System.out.println(vo.toString());
+					
+					/*
+					 * 这里设置股票对应的概念板块
+					 */
+					
+					vo.setCje((gnMap.containsKey(vo.getName()) ?gnMap.get(vo.getName()) :"-") );
 					map.put(vo.getCid(), vo);
 				}
 			}
@@ -358,10 +366,10 @@ public class RunZhangTingDiXi {
 		}
 
 		runZtDx();
-
+		System.out.println("---------------------隔1秒跑一次自选股-------------------------");
 		while (isrun) {
 
-			System.out.println("---------------------隔1秒跑一次自选股-------------------------");
+		
 
 			try {
 				

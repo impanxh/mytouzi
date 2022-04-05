@@ -119,10 +119,10 @@ public class RunZhuiZhangTing {
 		}
 
 		runZt();
-
+		System.out.println("---------------------隔2秒跑一次涨停个股-------------------------");
 		while (isrun) {
 
-			System.out.println("---------------------隔2秒跑一次涨停个股-------------------------");
+			
 
 			try {
 

@@ -50,7 +50,7 @@
 <script type="text/javascript" language="javascript" src="/js/common.js?ng=20220219160143"></script>
 <script type="text/javascript" language="javascript" src="/js/api.js?ng=20220219160143"></script>
 
-
+ <link rel="stylesheet" type="text/css" href="/css/jquery.dataTables.css">
 <link rel="stylesheet" type="text/css" href="/css/basecss.css">
 
 
@@ -150,9 +150,12 @@ setInterval (function() {
     </tr>
 
 	<tr style="border: 2px solid black; background-color: #CCC"> 
+		<td style="background-color: #93D1FF"><a href="/10jqka/queryDataFromCommand?filter[cmd]=startGnThread" target="_blank">启动概念板块监控</a></td>
 		<td style="background-color: #93D1FF"><a href="/gp/run?p=msg" target="_blank">开板通知</a></td>
 		<td style="background-color: #93D1FF"><a href="/10jqka/lianghua" target="_blank">拉升通知</a></td>
 		<td style="background-color: #93D1FF"><a href="/10jqka/lianghuaResult" target="_blank">查看分钟交易量</a></td>
+		
+		
     </tr>
 </table>
 <br/>
@@ -350,9 +353,9 @@ setInterval (function() {
 <table id="tablehy" class="trclick display nowrap" cellspacing="0"   >
 		<thead>
        <tr style="height:35px;">
-	         <th style="width:120px" >分类</th> 
-	        <th  >涨跌%</th>
-	        <th style="width:140px">涨涨跌数</th>
+	         <th style="width:120px" >板块</th> 
+	        <th  orderBy="199112">涨跌%</th>
+	        <th  orderBy="zjjlr" style="width:140px"  >资金净流入(亿)</th>
 	        
         </tr>
     </thead>
@@ -370,12 +373,12 @@ setInterval (function() {
 		<thead>
        <tr style="height:35px; background-color: #146aa2 ">
 	         <th >编码</th>
-	        <th style="width:130px" >名称</th>
-	        <th style="width:240px" orderBy="lightBox_s_s">分类</th>    
+	        <th style="width:120px" >名称</th>
+	        <th style="width:230px" orderBy="lightBox_s_s">分类</th>    
 	        <th style="width:85px;">标识</th> 
 	        
 	        <th>连板&15d</th>
-	          <th style="width:180px">封板</th>
+	          <th style="width:160px">封板</th>
 	          <th>涨筹码</th>
 	        <th>涨跌幅</th>
 	      
@@ -387,6 +390,7 @@ setInterval (function() {
 	      <!--    <th>昨天涨跌</th>-->
 	        <th>评分</th>
 	          <th>计划操作</th>
+	          <th style="width:120px">概念板块</th>
         </tr>
     </thead>
   </table>
@@ -401,16 +405,17 @@ setInterval (function() {
 <!-- 连板内容 -->
 
 
-<table id="table2d" class="trclick display nowrap" cellspacing="0"  width="74%" >
+<table id="table2d" class="trclick display nowrap" cellspacing="0"  width="84%" >
 		<thead>
        <tr style="height:35px;">
 	        <th>编码</th> 
 	       <th style="width:140px" >名称</th>
-	        <th>分类</th>
-	        <th   >涨停情况</th>
+	        <th style="width:140px">分类</th>
+	        <th  style="width:80px" >涨停情况</th>
 	        <th>涨跌幅</th>
 	        <th>开涨跌</th>
 	        <th>赚亏比</th>
+	        <th>概念板块</th>
         </tr>
     </thead>
   </table>
@@ -557,9 +562,15 @@ setInterval (function() {
 </td>
 </tr>
 </table>
-<script type="text/javascript" language="javascript" src="/js/e6/gpzxTable.js?16452577038019"></script>
-<script type="text/javascript" language="javascript" src="/js/e6/gphyTable.js?16452577038019"></script>
-<script type="text/javascript" language="javascript" src="/js/e6/gpz2dztable.js?16452577038019"></script>
+<script type="text/javascript" language="javascript" src="/js/layui/layui.js"></script>
+<!-- <link rel="stylesheet" type="text/css" href="/js/layui/css/layui.css">-->
+
+<script type="text/javascript" language="javascript" src="/js/e6/gpGnTable.js?16452577038019"></script>
+
+<script type="text/javascript" language="javascript" src="/js/e6/gpz2dzGntable.js?16452577038019"></script>
+
+<script type="text/javascript" language="javascript" src="/js/e6/gpzxGnTable.js?16452577038019"></script>
+
 <script type="text/javascript" language="javascript" src="/js/e6/10jqka.js?16452577038019"></script>
 
 

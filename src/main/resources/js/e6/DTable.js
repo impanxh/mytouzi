@@ -466,10 +466,10 @@
                         $(this).css("z-index", "999999999");
                     }).data('datepicker');
                 } catch (err) {
-                    console.log(err);
+                   // console.log(err);
                 }
                 try {
-                showTableField(api);
+               // showTableField(api);
  
             } catch (err) {
                 console.log(err);

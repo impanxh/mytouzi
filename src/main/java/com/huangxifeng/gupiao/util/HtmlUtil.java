@@ -43,6 +43,14 @@ public class HtmlUtil {
 			return page.getWebResponse().getContentAsString();
 		} catch (Exception e) {
 
+		} finally {
+			try {
+				webClient.getCurrentWindow().getJobManager().removeAllJobs();
+				webClient.close();
+				System.gc();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		return null;
 	}

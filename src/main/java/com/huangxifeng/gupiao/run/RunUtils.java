@@ -200,6 +200,9 @@ public class RunUtils {
 		// 读取所有股票文件方法
 		List<GuPiaoBaseVO> allgplist = RunUtils.getAllGpVoList();
 		DecimalFormat df = new DecimalFormat("0.00");
+		
+		
+		Map<String,String> gnMap  = getAllGnList();
 
 		int ztnum = 0;
 		
@@ -330,7 +333,8 @@ public class RunUtils {
 						_30dayzdb = ztvo.getZhangb().toString();
 					}
  
-					String textinfo = vo.toString() + "#" + zt15dnum + "#" + ztlx + "#" + _30dayzdb ;
+					String textinfo = vo.toString() + "#" + zt15dnum + "#" + ztlx + "#" + _30dayzdb +"#" + (gnMap.containsKey(vo.getName()) ?gnMap.get(vo.getName()) :"-")  ;
+				 
 				
 			//	System.out.println(textinfo);
 				strbuf.append(textinfo).append("\n");
@@ -1181,7 +1185,7 @@ public class RunUtils {
 //					continue;
 //				}
 //				
-				System.out.println(vo.toString() + "#" + liangAve + "#" + ztnum + "#" + info.getZsz() + "#" + info.getLtsz() + "#" + info.getSyl());
+			//	System.out.println(vo.toString() + "#" + liangAve + "#" + ztnum + "#" + info.getZsz() + "#" + info.getLtsz() + "#" + info.getSyl());
 				//System.out.println(vo.toString());
 				yibuf.append(vo.toString() + "\n");
 				yilist.add(vo);
@@ -2121,6 +2125,19 @@ public class RunUtils {
 
 	static List<String> getAllGpStr() {
 		return FileUtil.readToStringList(Config.DATA_DIR + "/data/allgp.txt", StringPool.UTF_8);
+	}
+	
+	
+
+	public static Map<String,String> getAllGnList() {
+		List<String> gplist = FileUtil.readToStringList(Config.DATA_DIR + "/data/gplist_distinct.txt", StringPool.UTF_8);
+		Map<String,String> r = new HashMap<String,String>();
+		for (int i = 0; i < gplist.size(); i++) {
+			String txt = gplist.get(i);
+			String[] split = txt.split("=");
+			r.put(split[0], split[1]);
+		}
+		return r;
 	}
 
 	public static List<GuPiaoBaseVO> getAllGpVoList() {
