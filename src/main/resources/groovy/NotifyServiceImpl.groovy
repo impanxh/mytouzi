@@ -338,7 +338,7 @@ public class NotifyServiceImpl implements NotifyService {
 			json =json.substring(1,json.length()-1)
 			def map = jsonSlurper.parseText(json)
 			def list = map.values();
-			println  "\n概念板块个数:"+gnMap.size()+" , 有效个数"+list.size();
+			//println  "\n概念板块个数:"+gnMap.size()+" , 有效个数"+list.size();
 			list.each {  item->
 				//println item;
 			}
@@ -412,10 +412,11 @@ public class NotifyServiceImpl implements NotifyService {
 	
 	def wcResult = null;
 	def lastWcUpdate =  -1; 
+	HtmlUtil  wcChrome = null;
 	def startWc() {
 		
 		
-		if(wcResult != null  ||  (  ( System.currentTimeMillis() -lastWcUpdate) < 45000   )  ) {
+		if(wcResult != null  &&  (  ( System.currentTimeMillis() -lastWcUpdate) < 45000   )  ) {
 			return wcResult;
 		}
 		/*
@@ -438,10 +439,10 @@ public class NotifyServiceImpl implements NotifyService {
 		def str13 =  "&block_list=&add_info={\"urp\":{\"scene\":1,\"company\":1,\"business\":1},\"contentType\":\"json\",\"searchInfo\":true}" 
 		 def req = str11+str12+str13
 		 */
+		if(wcChrome == null)
+		wcChrome = new HtmlUtil();
 		 
-		 HtmlUtil  util = new HtmlUtil();
-		 
-		def tableHtml =  util.work("http://iwencai.com","http://iwencai.com/unifiedwap/unified-wap/v2/result/get-robot-data?question=%E7%9F%AD%E7%BA%BF%E5%A4%8D%E7%9B%98&source=Ths_iwencai_Xuangu&version=2.0&page=1&log_info%3D%7B%22input_type%22%3A%22click%22%7D%26perpage%3D50%26secondary_intent%3D%26block_list%3D%26add_info%3D%7B%22urp%22%3A%7B%22scene%22%3A1%2C%22company%22%3A1%2C%22business%22%3A1%7D%2C%22contentType%22%3A%22json%22%2C%22searchInfo%22%3Atrue%7D");
+		def tableHtml =  wcChrome.work("http://iwencai.com","http://iwencai.com/unifiedwap/unified-wap/v2/result/get-robot-data?question=%E7%9F%AD%E7%BA%BF%E5%A4%8D%E7%9B%98&source=Ths_iwencai_Xuangu&version=2.0&page=1&log_info%3D%7B%22input_type%22%3A%22click%22%7D%26perpage%3D50%26secondary_intent%3D%26block_list%3D%26add_info%3D%7B%22urp%22%3A%7B%22scene%22%3A1%2C%22company%22%3A1%2C%22business%22%3A1%7D%2C%22contentType%22%3A%22json%22%2C%22searchInfo%22%3Atrue%7D");
 		
 		def jsonSlurper = new JsonSlurper()
 		def map = jsonSlurper.parseText(tableHtml);
