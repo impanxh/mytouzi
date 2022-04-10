@@ -27,6 +27,10 @@ import java.util.regex.Pattern;
 
 import com.huangxifeng.core.config.Config
 import com.huangxifeng.core.utils.HttpClientUtil;
+
+import java.util.concurrent.locks.ReentrantLock;
+
+
 /*
  import org.slf4j.Logger;
  import org.slf4j.LoggerFactory;*/
@@ -159,7 +163,7 @@ public class NotifyServiceImpl implements NotifyService {
 				i++;
 			}
 
-			 println " 拉升监控一轮结束  " + pageCache ;
+			println " 拉升监控一轮结束  " + pageCache ;
 			Thread.sleep(1000*15);
 
 		}
@@ -233,15 +237,15 @@ public class NotifyServiceImpl implements NotifyService {
 		if( cmd == "setGpGnDefault") {
 			return setGpGnDefault(params);
 		}
-		
+
 		return 'default';
 	}
 	def setGpGnDefault(params) {
-		
+
 		if(params .postData!=null && params .postData!= '' ) {
 			String dtfileurl = Config.DATA_DIR + File.separator + "data" + File.separator + "gnDefault.txt";
 			new File(dtfileurl) << params .postData+"\n";
-			
+
 			def split = params .postData .split("_") ;
 			List<ZhangTingDiXiVO> zxlist = RunZhangTingDiXi.getZtdxList();
 			zxlist.each { t ->
@@ -255,33 +259,32 @@ public class NotifyServiceImpl implements NotifyService {
 	 * 从文件加载股票对应gn信息
 	 */
 	def reloadGnFromFile(params) {
-			String dtfileurl = Config.DATA_DIR + File.separator + "data" + File.separator + "gnDefault.txt";
-			def file = new File(dtfileurl) ;
-			if(file.exists()) {
-				List<ZhangTingDiXiVO> zxlist = RunZhangTingDiXi.getZtdxList();
-				def zxListMap  =[:]
-				zxlist.each { t ->
-					zxListMap[t.name.trim()] = t;
-				}
-				def mergeMap = [:]
-				new File(dtfileurl) .eachLine(){
-					line -> 
-					def split = line .split("_") ;
-					mergeMap[split[0].trim()] = line ;
-				}
-				mergeMap.each { code, line -> 
-					if(zxListMap.containsKey(code)) {
-						zxListMap[code].setHsl(line);
-					}
+		String dtfileurl = Config.DATA_DIR + File.separator + "data" + File.separator + "gnDefault.txt";
+		def file = new File(dtfileurl) ;
+		if(file.exists()) {
+			List<ZhangTingDiXiVO> zxlist = RunZhangTingDiXi.getZtdxList();
+			def zxListMap  =[:]
+			zxlist.each { t ->
+				zxListMap[t.name.trim()] = t;
+			}
+			def mergeMap = [:]
+			new File(dtfileurl) .eachLine(){ line ->
+				def split = line .split("_") ;
+				mergeMap[split[0].trim()] = line ;
+			}
+			mergeMap.each { code, line ->
+				if(zxListMap.containsKey(code)) {
+					zxListMap[code].setHsl(line);
 				}
 			}
+		}
 	}
 
 	def getSortGnList(req) {
 		def sortField  = req.getOrder()==null ?null: req.getOrder()[0] ;
 		def entry  = null;
 		if(sortField!=null) {
-			entry = getHead(sortField); 
+			entry = getHead(sortField);
 			if(entry!=null && entry.getKey() == '199112'  ){
 				return 	  	gn199SortedList .sort{a,b-> return a['199112'] < b['199112']? ( entry.getValue() == 'asc'?-1:1 )   : (a['199112'] == b['199112'] ?0:( entry.getValue() == 'asc'?1:-1 ) )};
 			}
@@ -311,22 +314,22 @@ public class NotifyServiceImpl implements NotifyService {
 						}
 					}
 				}).start();
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					while(true){
-						try {
-							reloadGnFromFile();
-						} catch (Exception e) {
-							e.printStackTrace()
-						}finally {
-							Thread.sleep(1000*4);
+		new Thread(new Runnable() {
+					@Override
+					public void run() {
+						while(true){
+							try {
+								reloadGnFromFile();
+							} catch (Exception e) {
+								e.printStackTrace()
+							}finally {
+								Thread.sleep(1000*4);
+							}
 						}
 					}
-				}
-			}).start();
-			
-			
+				}).start();
+
+
 
 	}
 
@@ -409,55 +412,63 @@ public class NotifyServiceImpl implements NotifyService {
 		}
 
 	}
-	
+
 	def wcResult = null;
-	def lastWcUpdate =  -1; 
+	def lastWcUpdate =  -1;
 	HtmlUtil  wcChrome = null;
+
+	static ReentrantLock lock = new ReentrantLock();
 	def startWc() {
-		
-		
+
+
 		if(wcResult != null  &&  (  ( System.currentTimeMillis() -lastWcUpdate) < 45000   )  ) {
 			return wcResult;
 		}
 		/*
-		def a1 = URLEncoder. encode("log_info={\"input_type\":\"click\"}&perpage=50&secondary_intent=", "utf-8" ) 
-		def a2 = URLEncoder. encode("&block_list=&add_info={\"urp\":{\"scene\":1,\"company\":1,\"business\":1},\"contentType\":\"json\",\"searchInfo\":true}", "utf-8" )
-		
-		def body =  '<html><body><script src="//s.thsi.cn/js/chameleon/chameleon.min.1649407.js" type="text/javascript"></script>'+
-		'<script language="javascript" type="text/javascript">'+
-		'window.location.href="http://iwencai.com/unifiedwap/unified-wap/v2/result/get-robot-data?question=短线复盘&source=Ths_iwencai_Xuangu&version=2.0&page=1&'+
-		   a1+a2+
-		'"</script>'+ 
-		'</body></html>'
-	
-		def str11 =	"http://iwencai.com/unifiedwap/unified-wap/v2/result/get-robot-data?question=短线复盘&source=Ths_iwencai_Xuangu&version=2.0&page=1&"
-		//def str12  = URLEncoder. encode("log_info={\"input_type\":\"click\"}&perpage=50&secondary_intent=", "utf-8" )
+		 def a1 = URLEncoder. encode("log_info={\"input_type\":\"click\"}&perpage=50&secondary_intent=", "utf-8" ) 
+		 def a2 = URLEncoder. encode("&block_list=&add_info={\"urp\":{\"scene\":1,\"company\":1,\"business\":1},\"contentType\":\"json\",\"searchInfo\":true}", "utf-8" )
+		 def body =  '<html><body><script src="//s.thsi.cn/js/chameleon/chameleon.min.1649407.js" type="text/javascript"></script>'+
+		 '<script language="javascript" type="text/javascript">'+
+		 'window.location.href="http://iwencai.com/unifiedwap/unified-wap/v2/result/get-robot-data?question=短线复盘&source=Ths_iwencai_Xuangu&version=2.0&page=1&'+
+		 a1+a2+
+		 '"</script>'+ 
+		 '</body></html>'
+		 def str11 =	"http://iwencai.com/unifiedwap/unified-wap/v2/result/get-robot-data?question=短线复盘&source=Ths_iwencai_Xuangu&version=2.0&page=1&"
+		 //def str12  = URLEncoder. encode("log_info={\"input_type\":\"click\"}&perpage=50&secondary_intent=", "utf-8" )
 		 //def str13 = URLEncoder. encode("&block_list=&add_info={\"urp\":{\"scene\":1,\"company\":1,\"business\":1},\"contentType\":\"json\",\"searchInfo\":true}", "utf-8" )
-		
-		
-		def str12  =  "log_info={\"input_type\":\"click\"}&perpage=50&secondary_intent="
-		def str13 =  "&block_list=&add_info={\"urp\":{\"scene\":1,\"company\":1,\"business\":1},\"contentType\":\"json\",\"searchInfo\":true}" 
+		 def str12  =  "log_info={\"input_type\":\"click\"}&perpage=50&secondary_intent="
+		 def str13 =  "&block_list=&add_info={\"urp\":{\"scene\":1,\"company\":1,\"business\":1},\"contentType\":\"json\",\"searchInfo\":true}" 
 		 def req = str11+str12+str13
 		 */
-		if(wcChrome == null)
-		wcChrome = new HtmlUtil();
-		 
-		def tableHtml =  wcChrome.work("http://iwencai.com","http://iwencai.com/unifiedwap/unified-wap/v2/result/get-robot-data?question=%E7%9F%AD%E7%BA%BF%E5%A4%8D%E7%9B%98&source=Ths_iwencai_Xuangu&version=2.0&page=1&log_info%3D%7B%22input_type%22%3A%22click%22%7D%26perpage%3D50%26secondary_intent%3D%26block_list%3D%26add_info%3D%7B%22urp%22%3A%7B%22scene%22%3A1%2C%22company%22%3A1%2C%22business%22%3A1%7D%2C%22contentType%22%3A%22json%22%2C%22searchInfo%22%3Atrue%7D");
-		
+		def tableHtml = null;
+		if (lock.tryLock()) {
+			try {
+				if(wcChrome == null) {
+					wcChrome = new HtmlUtil();
+				}
+				tableHtml =  wcChrome.work("http://iwencai.com","http://iwencai.com/unifiedwap/unified-wap/v2/result/get-robot-data?question=%E7%9F%AD%E7%BA%BF%E5%A4%8D%E7%9B%98&source=Ths_iwencai_Xuangu&version=2.0&page=1&log_info%3D%7B%22input_type%22%3A%22click%22%7D%26perpage%3D50%26secondary_intent%3D%26block_list%3D%26add_info%3D%7B%22urp%22%3A%7B%22scene%22%3A1%2C%22company%22%3A1%2C%22business%22%3A1%7D%2C%22contentType%22%3A%22json%22%2C%22searchInfo%22%3Atrue%7D");
+			}
+			finally {
+				lock.unlock();
+			}
+
+		}
+		if(StringUtils.isBlank(tableHtml)) {
+			return ;
+		}
 		def jsonSlurper = new JsonSlurper()
 		def map = jsonSlurper.parseText(tableHtml);
-		
+
 		def data  = map['data'];
-		
+
 		def answer  = data['answer'];
-		
+
 		def t0  = answer['txt'];
 		def content =  t0[0]['content'];
 		def content1 = jsonSlurper.parseText(content);
 		//def content =  map.data.answer.txt[0].content
 		def components =  content1['components'];//['datas'];
-		components.each { 
-			item->
+		components.each {  item->
 			if(item.show_type =='line3') {
 				wcResult = item.data.datas;
 			}
@@ -469,7 +480,7 @@ public class NotifyServiceImpl implements NotifyService {
 		println "fetch-temperature:" + wcResult.size();
 		return wcResult  ;
 		//return  body  //这里能工作
-		
+
 	}
 	/**
 	 从 http://q.10jqka.com.cn/gn/ 分析 股票对应板块
@@ -564,8 +575,8 @@ public class NotifyServiceImpl implements NotifyService {
 		//distinctGngp();
 		//fetchGnGp();
 		/*if(1==1){
-			return ;
-		}*/
+		 return ;
+		 }*/
 
 		if(isRun) {
 			return ;
@@ -624,7 +635,7 @@ public class NotifyServiceImpl implements NotifyService {
 					}
 				}
 				println "\n" + cache.toString().replaceAll(",","\n").replaceAll("\\[","").replaceAll("\\]","");
-				
+
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
