@@ -39,7 +39,29 @@
         .bgdz{background-color: #FFFFCC;}
         .bgdz{background-color: #FFFFCC;}
         .dt-buttons{display: none;}
+        
+        
     </style>
+      <!--    <style>::-webkit-scrollbar{display:none;}html,body{overflow:hidden;height:100%;margin:0;}</style>-->
+      <style type="text/css">
+        #jsmind_container{
+            width:900px;
+            height:250px;
+            border:solid 1px #ccc;
+            /*background:#f4f4f4;*/
+            /*background:#f4f4f4;*/
+        }
+    </style>
+    
+    
+    <style type="text/css">
+	 
+		 
+		.circlechart {
+			float: left;
+			padding: 20px;
+		}
+	</style>
 </head>
 <!--遍历数组-->
 <body>
@@ -57,6 +79,11 @@
 <link rel="stylesheet" type="text/css" href="/css/buttons.dataTables.min.css">
 <link rel="stylesheet" type="text/css" href="/css/exportExcelbuttons.css">
 
+<link rel="stylesheet" href="/css/progresscircle.css">
+
+<link type="text/css" rel="stylesheet" href="/css/jsmind.css" />
+<script type="text/javascript" src="/js/jsmind.js"></script>
+<script type="text/javascript" src="/js/jsmind.draggable.js"></script>
 
 <script type="text/javascript" language="javascript"  src="/js/jquery.dataTables-1.10.7.min.js"></script>
 <script type="text/javascript" language="javascript" src="/js/e6/DTable.js"></script>
@@ -74,6 +101,8 @@
 <script type="text/javascript" language="javascript" src="/js/jquery-dataTables-fnCounterColumns.js"></script>
 <script type="text/javascript" language="javascript" src="/js/jquery-dataTables-fnFakeRowspan.js"></script>
 
+<script>/*Fixing iframe window.innerHeight 0 issue in Safari*/document.body.clientHeight;</script>
+<script src="https://gw.alipayobjects.com/os/antv/pkg/_antv.g2-3.5.1/dist/g2.min.js"></script>
 
 
 
@@ -154,16 +183,53 @@ setInterval (function() {
 		<td style="background-color: #93D1FF"><a href="/gp/run?p=msg" target="_blank">开板通知</a></td>
 		<td style="background-color: #93D1FF"><a href="/10jqka/lianghua" target="_blank">拉升通知</a></td>
 		<td style="background-color: #93D1FF"><a href="/10jqka/lianghuaResult" target="_blank">查看分钟交易量</a></td>
+		<td style="background-color: #d75442"><a href="/10jqka/mind" target="_blank">思维导图</a></td>
 		
 		
     </tr>
 </table>
 <br/>
 
+<div id="mountNode2">情绪温度   上涨家数/总家数</div> 
+ <div id="mountNode"></div>
+ 
+ <div id="today10jqka">
+ <div style="margin-left: 55px;">今日大盘评级</div>
+ <div> <!-- <canvas id="my_html" width="200" height="200"></canvas>-->
+ 
+   
+      <div class="circlechart" id="circlechart1" data-percentage="100">100</div>
+      
+      
+      
+ 
+ <div style="display: inline-grid;margin-left: 70px; vertical-align: top ">涨跌分布 
+ <span class="c-rise red" style="margin-top: 40px;" >上涨：<span id="p1"></span>只</span>
+<span class="c-fall " style="color: #59b881">下跌：<span id="p2"></span>只</span> 
+</div>
+
+
+
+ <div style="display: inline-grid;margin-left: 70px; vertical-align: top ">涨跌停
+ <span class="c-rise red" style="margin-top: 40px;" >涨停：<span id="p3"></span>只</span>
+<span class="c-fall" style="color: #59b881">跌停：<span id="p4"></span>只</span> 
+</div>
+
+<div id="jsmind_container" style="display: inline-grid;margin-left: 10px; vertical-align: top "></div>
+ 
+ 
+ </div>
+ 
+ 
+ </div>  
+ <!--  
 <table>
+
     <tr style="border: 2px solid black; background-color: #EFEFEF">
         <td>
-            <img src="http://image.sinajs.cn/newchart/min/n/sh000001.gif" style="width: 270px;">
+          </td>
+
+
         </td>
         <td>
             <img src="http://image.sinajs.cn/newchart/min/n/sz399001.gif" style="width: 270px;">
@@ -178,15 +244,15 @@ setInterval (function() {
             <img src="http://image.sinajs.cn/newchart/min/n/sh000046.gif" style="width: 270px;">
         </td>
     </tr>
-</table>
+</table>-->
 <br/>
 
 <!-- 监控  -->
 <table>
 	<!-- 自选监控 -->
 	
-	<tr>
 	
+	<!-- <tr>
 	<td style="vertical-align:top; text-align: left; ">
 		<h3 style="margin:0px; padding:0px;" class="blue" id="02">
 		大盘评级（
@@ -201,15 +267,15 @@ setInterval (function() {
 		下跌：<span id="p4"  class="green" ></span>
 		）
 		</h3>
-	</td>
+	</td> 
 	
 	<td style="vertical-align:top; text-align: left;">
 		<h3 style="margin:0px; padding:0px;" class="blue" id="01">
 		
 		</h3>
-	</td>
+	</td>-->
 	
-	</tr>
+		<!--</tr>-->
 	
 	<tr>
 	
@@ -572,8 +638,16 @@ setInterval (function() {
 <script type="text/javascript" language="javascript" src="/js/e6/gpzxGnTable.js?16452577038019"></script>
 
 <script type="text/javascript" language="javascript" src="/js/e6/10jqka.js?16452577038019"></script>
+<script type="text/javascript" language="javascript" src="/js/e6/temperature.js?16452577038019"></script>
+<script type="text/javascript" language="javascript" src="/js/e6/jsmind.js?16452577038019"></script>
+
+ 
 
 
+<script src="/js/progress.js"></script>
 
+ 
+	
+	
 </body>
 </html>

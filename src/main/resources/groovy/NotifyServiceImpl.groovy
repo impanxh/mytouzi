@@ -62,8 +62,8 @@ public class NotifyServiceImpl implements NotifyService {
 											def number = timeView[hhmm] ;
 											if(number > 5000 && zdf < 9.7 && zdf > -9.5) {
 												def msg = getCurrTime () + " " +t.getName() + " 拉升 - 分钟交易量:"+ number+" 当前:"+zdf+"%" ;
-												sendMsg(msg,'1000003',  'giTnB3iCtxSTj2ZNd4809flDH_JC5DbPW3I6JMOx2R0');
-												//sendMsg(msg,'1000004',  'PuMOZPQ0ubdUm8o5dFNNlcMJRARRIYMXzMdgjbK4IK8');
+												//sendMsg(msg,'1000003',  'giTnB3iCtxSTj2ZNd4809flDH_JC5DbPW3I6JMOx2R0');
+												sendMsg(msg,'1000004',  'PuMOZPQ0ubdUm8o5dFNNlcMJRARRIYMXzMdgjbK4IK8');
 											}
 										}
 									}
@@ -112,7 +112,7 @@ public class NotifyServiceImpl implements NotifyService {
 							def lastPage = pageCache[code] == null ? w : pageCache[code] + w;
 							//lastPage = w;
 
-							println code+ " "+lastPage;
+							//println code+ " "+lastPage;
 							def result = f.requestWithFullYParams(null, "/data/index.php",[ "action": "data", "appn":"detail", "c":code,"p":lastPage],[:], Method.GET,groovyx.net.http.ContentType.HTML );
 							//Thread.sleep(10);
 							def str = String.valueOf(result) ;
@@ -146,7 +146,7 @@ public class NotifyServiceImpl implements NotifyService {
 									_lastpage= 1;
 								}
 								pageCache[code] = _lastpage
-								println "run over  "+code + " - "+ t.getName()+ " lastpage:" + lastPage;
+								//println "run over  "+code + " - "+ t.getName()+ " lastpage:" + lastPage;
 								totalAlResult[code+t.getName()] = minView;
 								hit = false;
 							}//end if
@@ -158,6 +158,8 @@ public class NotifyServiceImpl implements NotifyService {
 
 				i++;
 			}
+
+			 println " 拉升监控一轮结束  " + pageCache ;
 			Thread.sleep(1000*15);
 
 		}
@@ -336,7 +338,7 @@ public class NotifyServiceImpl implements NotifyService {
 			json =json.substring(1,json.length()-1)
 			def map = jsonSlurper.parseText(json)
 			def list = map.values();
-			println  "gn有效排行:"+list.size();
+			println  "\n概念板块个数:"+gnMap.size()+" , 有效个数"+list.size();
 			list.each {  item->
 				//println item;
 			}
@@ -360,7 +362,7 @@ public class NotifyServiceImpl implements NotifyService {
 			def split = t.split("_");
 			gnMap[split[0]] = split[1];
 		}
-		println "概念板块: "+gnMap.size();
+		//println "概念板块: "+gnMap.size();
 		//println "概念板块: "+gnMap.getClass();
 		parseGnSection(body);
 		return gnMap;
@@ -406,6 +408,67 @@ public class NotifyServiceImpl implements NotifyService {
 			newFile.write(k+"="+v.toString()+"\n");
 		}
 
+	}
+	
+	def wcResult = null;
+	def lastWcUpdate =  -1; 
+	def startWc() {
+		
+		
+		if(wcResult != null  ||  (  ( System.currentTimeMillis() -lastWcUpdate) < 45000   )  ) {
+			return wcResult;
+		}
+		/*
+		def a1 = URLEncoder. encode("log_info={\"input_type\":\"click\"}&perpage=50&secondary_intent=", "utf-8" ) 
+		def a2 = URLEncoder. encode("&block_list=&add_info={\"urp\":{\"scene\":1,\"company\":1,\"business\":1},\"contentType\":\"json\",\"searchInfo\":true}", "utf-8" )
+		
+		def body =  '<html><body><script src="//s.thsi.cn/js/chameleon/chameleon.min.1649407.js" type="text/javascript"></script>'+
+		'<script language="javascript" type="text/javascript">'+
+		'window.location.href="http://iwencai.com/unifiedwap/unified-wap/v2/result/get-robot-data?question=短线复盘&source=Ths_iwencai_Xuangu&version=2.0&page=1&'+
+		   a1+a2+
+		'"</script>'+ 
+		'</body></html>'
+	
+		def str11 =	"http://iwencai.com/unifiedwap/unified-wap/v2/result/get-robot-data?question=短线复盘&source=Ths_iwencai_Xuangu&version=2.0&page=1&"
+		//def str12  = URLEncoder. encode("log_info={\"input_type\":\"click\"}&perpage=50&secondary_intent=", "utf-8" )
+		 //def str13 = URLEncoder. encode("&block_list=&add_info={\"urp\":{\"scene\":1,\"company\":1,\"business\":1},\"contentType\":\"json\",\"searchInfo\":true}", "utf-8" )
+		
+		
+		def str12  =  "log_info={\"input_type\":\"click\"}&perpage=50&secondary_intent="
+		def str13 =  "&block_list=&add_info={\"urp\":{\"scene\":1,\"company\":1,\"business\":1},\"contentType\":\"json\",\"searchInfo\":true}" 
+		 def req = str11+str12+str13
+		 */
+		 
+		 HtmlUtil  util = new HtmlUtil();
+		 
+		def tableHtml =  util.work("http://iwencai.com","http://iwencai.com/unifiedwap/unified-wap/v2/result/get-robot-data?question=%E7%9F%AD%E7%BA%BF%E5%A4%8D%E7%9B%98&source=Ths_iwencai_Xuangu&version=2.0&page=1&log_info%3D%7B%22input_type%22%3A%22click%22%7D%26perpage%3D50%26secondary_intent%3D%26block_list%3D%26add_info%3D%7B%22urp%22%3A%7B%22scene%22%3A1%2C%22company%22%3A1%2C%22business%22%3A1%7D%2C%22contentType%22%3A%22json%22%2C%22searchInfo%22%3Atrue%7D");
+		
+		def jsonSlurper = new JsonSlurper()
+		def map = jsonSlurper.parseText(tableHtml);
+		
+		def data  = map['data'];
+		
+		def answer  = data['answer'];
+		
+		def t0  = answer['txt'];
+		def content =  t0[0]['content'];
+		def content1 = jsonSlurper.parseText(content);
+		//def content =  map.data.answer.txt[0].content
+		def components =  content1['components'];//['datas'];
+		components.each { 
+			item->
+			if(item.show_type =='line3') {
+				wcResult = item.data.datas;
+			}
+		}
+		if(wcResult.size()>0) {
+			lastWcUpdate  = System.currentTimeMillis()
+		}
+		//def content = jsonSlurper.parseText(content);
+		println "fetch-temperature:" + wcResult.size();
+		return wcResult  ;
+		//return  body  //这里能工作
+		
 	}
 	/**
 	 从 http://q.10jqka.com.cn/gn/ 分析 股票对应板块
@@ -496,12 +559,12 @@ public class NotifyServiceImpl implements NotifyService {
 
 	def isRun = false;
 	public void analyDataAndSendMsg( ) {
-		syncGn();
+		//syncGn();
 		//distinctGngp();
 		//fetchGnGp();
-		if(1==1){
+		/*if(1==1){
 			return ;
-		}
+		}*/
 
 		if(isRun) {
 			return ;
@@ -559,7 +622,8 @@ public class NotifyServiceImpl implements NotifyService {
 						}
 					}
 				}
-				println cache;
+				println "\n" + cache.toString().replaceAll(",","\n").replaceAll("\\[","").replaceAll("\\]","");
+				
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
