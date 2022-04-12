@@ -3,32 +3,29 @@ package com.huangxifeng.gupiao.service.impl;
 import static groovyx.net.http.ContentType.*
 import static groovyx.net.http.Method.*
 
+import java.math.RoundingMode
+import java.text.DecimalFormat
 import java.text.SimpleDateFormat
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.math.NumberUtils
 import org.springframework.stereotype.Service
 
+import com.huangxifeng.core.config.Config
+import com.huangxifeng.core.utils.HttpClientUtil;
 import com.huangxifeng.gupiao.jymodel.RunJianKong
 import com.huangxifeng.gupiao.jymodel.RunZhangTingDiXi
 import com.huangxifeng.gupiao.service.NotifyService
-import com.huangxifeng.gupiao.vo.JianKongVO
-import com.huangxifeng.gupiao.vo.QingXuJianKongVO
-import com.huangxifeng.gupiao.vo.ZhangTingDiXiVO
 import com.huangxifeng.gupiao.util.HtmlUtil
 import com.huangxifeng.gupiao.util.TableRequest
-import groovy.json.JsonOutput
+import com.huangxifeng.gupiao.vo.JianKongVO
+import com.huangxifeng.gupiao.vo.ZhangTingDiXiVO
+
 import groovy.json.JsonSlurper
-import groovy.json.StringEscapeUtils
 import groovyx.net.http.*
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import com.huangxifeng.core.config.Config
-import com.huangxifeng.core.utils.HttpClientUtil;
-
-import java.util.concurrent.locks.ReentrantLock;
 
 
 /*
@@ -99,71 +96,75 @@ public class NotifyServiceImpl implements NotifyService {
 
 		def pageCache = [:]
 		while(1==1) {
-			zxlist.each { t ->
-				def code = t.getCid() ;
-				def minView  = [:]
-				def hh = new SimpleDateFormat("HH").format( System.currentTimeMillis()  )  ;
-				//println hh ;
-				//println code;
-				if( (code=='sz002349' || 1==1)  && NumberUtils.toInt(hh) < 15) {
-					//https://stock.gtimg.cn/data/index.php?appn=detail&action=data&c=sz002349&p=66
-					HttpApi f = new HttpApi('https://stock.gtimg.cn');
-					def hit  = true;
-					(1..90).each{w->
-						if(hit) {
+
+			if(isGPRunningTime()) {//判断gp运行时间
+				zxlist.each { t ->
+					def code = t.getCid() ;
+					def minView  = [:]
+					def hh = new SimpleDateFormat("HH").format( System.currentTimeMillis()  )  ;
+					//println hh ;
+					//println code;
+					if( (code=='sz002349' || 1==1)  && NumberUtils.toInt(hh) < 15) {
+						//https://stock.gtimg.cn/data/index.php?appn=detail&action=data&c=sz002349&p=66
+						HttpApi f = new HttpApi('https://stock.gtimg.cn');
+						def hit  = true;
+						(1..90).each{w->
+							if(hit) {
 
 
-							def lastPage = pageCache[code] == null ? w : pageCache[code] + w;
-							//lastPage = w;
+								def lastPage = pageCache[code] == null ? w : pageCache[code] + w;
+								//lastPage = w;
 
-							//println code+ " "+lastPage;
-							def result = f.requestWithFullYParams(null, "/data/index.php",[ "action": "data", "appn":"detail", "c":code,"p":lastPage],[:], Method.GET,groovyx.net.http.ContentType.HTML );
-							//Thread.sleep(10);
-							def str = String.valueOf(result) ;
-							if(str.length()>40) {
-								def split1 = str.split("\"");
-								//println "-->"+split1[1];
-								def oneTime = split1[1].split("\\|");
+								//println code+ " "+lastPage;
+								def result = f.requestWithFullYParams(null, "/data/index.php",[ "action": "data", "appn":"detail", "c":code,"p":lastPage],[:], Method.GET,groovyx.net.http.ContentType.HTML );
+								//Thread.sleep(10);
+								def str = String.valueOf(result) ;
+								if(str.length()>40) {
+									def split1 = str.split("\"");
+									//println "-->"+split1[1];
+									def oneTime = split1[1].split("\\|");
 
-								oneTime.each { item->
-									def timeSplit = item.split("/");
-									//println timeSplit
-									String time  = timeSplit[1] ;
-									def type  = timeSplit[6] ;
-									def number  = timeSplit[4] ;
-									def min1 =  time.split(":")
-									def min = min1[0] +":" + min1[1]
+									oneTime.each { item->
+										def timeSplit = item.split("/");
+										//println timeSplit
+										String time  = timeSplit[1] ;
+										def type  = timeSplit[6] ;
+										def number  = timeSplit[4] ;
+										def min1 =  time.split(":")
+										def min = min1[0] +":" + min1[1]
 
-									if(!minView.containsKey(min)) {
-										minView[min] = 0;
+										if(!minView.containsKey(min)) {
+											minView[min] = 0;
+										}
+										if(type == "B") {
+											minView[min]  =  minView[min]  + NumberUtils.toInt(number);
+										}
+										if(type == "S") {
+											minView[min]  =  minView[min]  - NumberUtils.toInt(number);
+										}
 									}
-									if(type == "B") {
-										minView[min]  =  minView[min]  + NumberUtils.toInt(number);
+								}else {
+									def _lastpage  = lastPage - 5 ; //只取最近5页数据 分析 最近几分钟
+									if(_lastpage <= 0) {
+										_lastpage= 1;
 									}
-									if(type == "S") {
-										minView[min]  =  minView[min]  - NumberUtils.toInt(number);
-									}
-								}
-							}else {
-								def _lastpage  = lastPage - 5 ; //只取最近5页数据 分析 最近几分钟
-								if(_lastpage <= 0) {
-									_lastpage= 1;
-								}
-								pageCache[code] = _lastpage
-								//println "run over  "+code + " - "+ t.getName()+ " lastpage:" + lastPage;
-								totalAlResult[code+t.getName()] = minView;
-								hit = false;
-							}//end if
+									pageCache[code] = _lastpage
+									//println "run over  "+code + " - "+ t.getName()+ " lastpage:" + lastPage;
+									totalAlResult[code+t.getName()] = minView;
+									hit = false;
+								}//end if
+
+							}
 
 						}
-
 					}
-				}
 
-				i++;
-			}
+					i++;
+				}//end each
+				println " 拉升监控一轮结束  " + pageCache ;
+			}//end if gptime
 
-			println " 拉升监控一轮结束  " + pageCache ;
+			
 			Thread.sleep(1000*15);
 
 		}
@@ -221,6 +222,28 @@ public class NotifyServiceImpl implements NotifyService {
 		return map.entrySet().iterator().next();
 	}
 
+	def isGPRunningTime() {
+		def  r =  false;
+		GregorianCalendar calendar = new GregorianCalendar();
+		int hour = calendar.get(Calendar.HOUR_OF_DAY);
+		int nowMin = calendar.get(Calendar.MINUTE);
+
+		if(hour == 9  && nowMin > 30) {
+			r = true;
+		}
+		if(hour > 9) {
+			r = true;
+		}
+		if(hour == 12 && nowMin < 57) {
+			r = false ;
+		}
+		return r;
+	}
+
+	def startTest() {
+		println isGPRunningTime();
+
+	}
 	public Object queryDataFromCommand(TableRequest req) {
 		def params  = req.getFilter();
 		def  cmd = params['cmd'];
@@ -236,6 +259,9 @@ public class NotifyServiceImpl implements NotifyService {
 		}
 		if( cmd == "setGpGnDefault") {
 			return setGpGnDefault(params);
+		}
+		if( cmd == "monitorBkCache") {
+			return monitorBkCache
 		}
 
 		return 'default';
@@ -280,6 +306,133 @@ public class NotifyServiceImpl implements NotifyService {
 		}
 	}
 
+	def monitorBkCache = [:]
+	def isMonitorRunning = false;
+	def startMonitorBk() {
+		if(isMonitorRunning) {
+			return ;
+		}
+		isMonitorRunning = true;
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				def cache = [:]
+				def lastZdf = [:]
+				java.util.Random rd = new java.util.Random();
+				def count = 0;
+				def debugadd = [:];
+				//def util= new HtmlUtil();
+				def isDebugModel = false;
+				while(1==1){
+					try {
+						if(isGPRunningTime() || 1==1) { 
+								def list = gn199SortedList .sort{a,b-> return a['199112'] < b['199112']? 1    : (a['199112'] == b['199112'] ?0: -1  )};
+								list.each { 
+									row->
+									def platename = row.platename;
+									
+									def zdf = row['199112'];
+									//debug
+									if(isDebugModel) {
+										 def add = rd.nextFloat()
+										 def  r1 = rd.nextInt(2) ; 
+										 
+										 if(count < 30) {
+											 if(r1==0) {
+												 zdf =  zdf+add
+											 }
+											 
+											 if(r1==1) {
+												 zdf =  zdf- add
+											 }
+										 }else  {
+											 
+											 if( !debugadd.containsKey(platename)) {
+												 debugadd[platename]  = 0 ;
+											 }
+											 if(platename == "玉米") {
+												 debugadd[platename] = debugadd[platename] + add
+												 zdf =  zdf + debugadd[platename]
+											 }
+										 }
+									}
+									
+									if(zdf > 0 && row.zjjlr > 0 ) {
+										if(  !monitorBkCache.containsKey(platename)) {
+											monitorBkCache[platename] = new LinkedHashMap<String,Float>() {
+												protected boolean removeEldestEntry(Map.Entry<String,Float> eldest) {
+													return size() > 15; //3
+												}
+											}	
+										}
+										def hhmm = new SimpleDateFormat("HH_mm_ss").format( System.currentTimeMillis()   )  ;
+										def map =  monitorBkCache[platename] ;
+										
+										if(lastZdf.containsKey(platename)) {
+											def lastzdf = lastZdf[platename] ; 
+											//println cache;
+											//println zdf +"  = "+ lastzdf +" = "+(zdf - lastzdf);
+											if(zdf - lastzdf >= 0.5 ) {
+												def minList = map;
+												def maxValue = 0;
+												minList.each { 
+													hhmmKey,zdfFloat->
+													if(zdfFloat > maxValue ) {
+														maxValue = zdfFloat;
+													}
+												}
+												if(minList.size() > 3 &&  (zdf > (maxValue + 0.2) )    ) {
+													def zdfStr =  format2(zdf) ; 
+													println "-----------------"
+													println platename +" "+ zdfStr + "  maxIn5Minute " + maxValue ; 
+													println map
+													 
+													def msg = getCurrTime () + " 板块 - " + platename + " 拉升至  " + zdfStr +"%" // + getTop3ByGN(row.cid,util);
+													//sendMsg(msg,'1000003',  'giTnB3iCtxSTj2ZNd4809flDH_JC5DbPW3I6JMOx2R0');//炸板
+													//sendMsg(msg,'1000004',  'PuMOZPQ0ubdUm8o5dFNNlcMJRARRIYMXzMdgjbK4IK8');//个股拉升
+													sendMsg(msg,'1000005',  'enIF4g9tzwDDrvZGodzH__Pm-TCK95VyhxV1Go6Zc24');
+													
+												}
+												
+											}
+										}else  {
+											lastZdf[platename]  = zdf
+										}
+										map[hhmm] = (float)zdf;
+										
+									}
+								}
+								count++;
+								//println cache;
+							println "GnMoniter round over "+ count
+					
+						}
+					} catch (Exception e) {
+							e.printStackTrace()
+					}finally {
+							Thread.sleep(1000*20);
+					}
+				}
+			}
+		}).start();
+	}
+	
+	def getTop3ByGN(k,util) {
+		println k;
+	  String hostUrl = "http://q.10jqka.com.cn/";
+	  def tableHtml =  util.work(hostUrl,"https://q.10jqka.com.cn/gn/detail/field/264648/order/desc/page/1/ajax/1/code/"+k);
+	  def codeList = getSubUtil(tableHtml, "<a href=\"http://stockpage.10jqka.com.cn/(.*?)\" target=\"_blank\">(.*?)</a></td>");
+	  def lineAppend = new StringBuffer();
+	   codeList.each{ oneCode->
+		   if(!oneCode.contains("/")){
+			   def split = oneCode.split("_");
+			   def codeName  = split[1] ;
+			   lineAppend.append(codeName+"\n" );
+			    
+		   }
+	 }
+	 return  lineAppend.toString()
+	}
 	def getSortGnList(req) {
 		def sortField  = req.getOrder()==null ?null: req.getOrder()[0] ;
 		def entry  = null;
@@ -588,54 +741,55 @@ public class NotifyServiceImpl implements NotifyService {
 		def countMap = [:]
 		while (true) {
 			try {
-				List<ZhangTingDiXiVO> zxlist = RunZhangTingDiXi.getZtdxList();
+				if(isGPRunningTime()) {//判断gp运行时间
+					List<ZhangTingDiXiVO> zxlist = RunZhangTingDiXi.getZtdxList();
 
-				//2板
-				List<JianKongVO> zt2list = RunJianKong.getList("ZT2D_LIST");
-				RunJianKong.sort(zt2list, "cate");
+					//2板
+					List<JianKongVO> zt2list = RunJianKong.getList("ZT2D_LIST");
+					RunJianKong.sort(zt2list, "cate");
 
-				def monitorList = [];
+					def monitorList = [];
 
-				monitorList.addAll(zxlist)
-				monitorList.addAll(zt2list)
+					monitorList.addAll(zxlist)
+					monitorList.addAll(zt2list)
 
-				monitorList.each { t ->
-					def codeName = t.getName() ;
-					def zdf = null;
+					monitorList.each { t ->
+						def codeName = t.getName() ;
+						def zdf = null;
 
-					if(t.getClass().getName().contains("JianKongVO")){
-						zdf = (float) t.getZdf() ;
-						codeName = t.getName() +(" 二进三 ")
-					}else{
-						zdf = NumberUtils.toFloat( t.getZdf() ) ;
-					}
+						if(t.getClass().getName().contains("JianKongVO")){
+							zdf = (float) t.getZdf() ;
+							codeName = t.getName() +(" 二进三 ")
+						}else{
+							zdf = NumberUtils.toFloat( t.getZdf() ) ;
+						}
 
-					if(!t.getCid().startsWith("sz300")   ) {
+						if(!t.getCid().startsWith("sz300")   ) {
 
-						if(t.getZdf() !=null && zdf >= 9.88) {
-							//println  codeName + " - "+ zdf
-							cache.putIfAbsent(codeName, zdf)
-							if(downSet.contains(codeName)) {
-								downSet.remove(codeName)
-								def msg = getCurrTime () + " " + codeName + " 再涨停  "+zdf ;
+							if(t.getZdf() !=null && zdf >= 9.88) {
+								//println  codeName + " - "+ zdf
+								cache.putIfAbsent(codeName, zdf)
+								if(downSet.contains(codeName)) {
+									downSet.remove(codeName)
+									def msg = getCurrTime () + " " + codeName + " 再涨停  "+zdf ;
+									sendMsg(msg,'1000003',  'giTnB3iCtxSTj2ZNd4809flDH_JC5DbPW3I6JMOx2R0');
+									//sendMsg(msg,'1000004',  'PuMOZPQ0ubdUm8o5dFNNlcMJRARRIYMXzMdgjbK4IK8');
+								}
+							}
+							if(zdf < 9.87 && cache.containsKey(codeName)) {
+								countMap.putIfAbsent(codeName,  new java.util.concurrent.atomic.AtomicLong() )
+								def fc = countMap[codeName].incrementAndGet();
+								//println  codeName + " - "+ zdf+"----> MSG"
+								cache.remove(codeName);
+								downSet << codeName;
+								def msg = getCurrTime () + " " + codeName  + " 炸板 "+ (fc==1?"":"【"+fc+"】")  +"  " + zdf ;
 								sendMsg(msg,'1000003',  'giTnB3iCtxSTj2ZNd4809flDH_JC5DbPW3I6JMOx2R0');
 								//sendMsg(msg,'1000004',  'PuMOZPQ0ubdUm8o5dFNNlcMJRARRIYMXzMdgjbK4IK8');
 							}
 						}
-						if(zdf < 9.87 && cache.containsKey(codeName)) {
-							countMap.putIfAbsent(codeName,  new java.util.concurrent.atomic.AtomicLong() )
-							def fc = countMap[codeName].incrementAndGet();
-							//println  codeName + " - "+ zdf+"----> MSG"
-							cache.remove(codeName);
-							downSet << codeName;
-							def msg = getCurrTime () + " " + codeName  + " 炸板 "+ (fc==1?"":"【"+fc+"】")  +"  " + zdf ;
-							sendMsg(msg,'1000003',  'giTnB3iCtxSTj2ZNd4809flDH_JC5DbPW3I6JMOx2R0');
-							//sendMsg(msg,'1000004',  'PuMOZPQ0ubdUm8o5dFNNlcMJRARRIYMXzMdgjbK4IK8');
-						}
 					}
+					println "\n" + cache.toString().replaceAll(",","\n").replaceAll("\\[","").replaceAll("\\]","");
 				}
-				println "\n" + cache.toString().replaceAll(",","\n").replaceAll("\\[","").replaceAll("\\]","");
-
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -848,6 +1002,10 @@ public class NotifyServiceImpl implements NotifyService {
 			return respr;
 		}
 	}
-
+	public static String format2(double value) {
+		DecimalFormat df = new DecimalFormat("0.00");//创建一个df对象，传入0.00表示构造一个保留小数点后两位的df对象
+		df.setRoundingMode(RoundingMode.HALF_UP);//设置规则，这里采用的也是四舍五入规则
+		return df.format(value);//返回value（在返回之前使用df对象的格式化方法将数据格式化）
+	}
 
 }

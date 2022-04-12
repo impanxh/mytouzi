@@ -42,7 +42,7 @@ function load_jsmind(){
                 {"id":"sub42", "parentid":"sub4", "topic":"正常卖出时间统一到2：10分,止损随时"},
                 {"id":"sub43", "parentid":"sub4", "topic":"只在二种情况下 才交易<br>  一 及时止损的情况 尽早割肉<br> 二 早盘无股可买的情况下博明天买股 "},
                    
-                {"id":"sub5", "parentid":"root", "topic":"尽可能多时候去空仓"},
+                {"id":"sub5", "parentid":"root", "topic":"尽可能多时候去空仓 总结思考"},
                 
                 
                 {"id":"sub6", "parentid":"root", "topic":"持多少只股合适"},

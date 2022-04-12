@@ -194,7 +194,7 @@ public class RunUtils {
 		deleteIfexist(ztgpfile, ztdayfile);
 
 		List<String> list = new ArrayList<String>();
-		StringBuffer strbuf = new StringBuffer("股票ID#股票名称#行业#15天涨停#涨停类型#30日涨跌比\n");
+		StringBuffer strbuf = new StringBuffer("股票ID#股票名称#行业#15天涨停#涨停类型#30日涨跌比#概念模块\n");
 		System.out.println("股票ID#股票名称#行业#15天涨停#涨停类型#30日涨跌比");
 			
 		// 读取所有股票文件方法

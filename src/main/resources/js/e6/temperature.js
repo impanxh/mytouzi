@@ -1,4 +1,4 @@
-
+//  https://www.wetuancloud.com/zh-cn/g2/3.x/demo/other/line-realtime.html#
 
 	function getWithFunc(url,func) {
 	    $.ajax({
