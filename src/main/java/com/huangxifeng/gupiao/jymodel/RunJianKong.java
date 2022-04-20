@@ -82,6 +82,13 @@ public class RunJianKong
 					return (int)(DoubleUtil.mul(o2.getZkb() , 100.0 , 0) - DoubleUtil.mul(o1.getZkb() , 100.0 , 0));
 				}
 			});	
+		}else if (px.equals("zdf")) { 
+			Collections.sort(gplist, new Comparator<JianKongVO>() {
+				@Override
+				public int compare(JianKongVO o1, JianKongVO o2) {
+					return (int)(DoubleUtil.mul(o2.getZdf() , 100.0 , 0) - DoubleUtil.mul(o1.getZdf() , 100.0 , 0));
+				}
+			});	
 		}
 	}
 

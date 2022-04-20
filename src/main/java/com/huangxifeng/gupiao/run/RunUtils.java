@@ -91,7 +91,7 @@ public class RunUtils {
 		
 		//这个类都是操作股票的工具
 				
-		//downloadMonthFile();
+		downloadMonthFile();
 
 		get1YiList(true);
 		// getSuoLiangList(true);

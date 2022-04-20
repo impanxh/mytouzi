@@ -12,7 +12,16 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.math.NumberUtils
+import org.springframework.core.io.FileUrlResource
+import org.springframework.http.ContentDisposition
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
+import org.springframework.util.LinkedMultiValueMap
+import org.springframework.util.MultiValueMap
+import org.springframework.web.client.RestTemplate
+import org.springframework.web.util.UriComponentsBuilder
 
 import com.huangxifeng.core.config.Config
 import com.huangxifeng.core.utils.HttpClientUtil;
@@ -22,6 +31,7 @@ import com.huangxifeng.gupiao.service.NotifyService
 import com.huangxifeng.gupiao.util.HtmlUtil
 import com.huangxifeng.gupiao.util.TableRequest
 import com.huangxifeng.gupiao.vo.JianKongVO
+import com.huangxifeng.gupiao.vo.QingXuJianKongVO
 import com.huangxifeng.gupiao.vo.ZhangTingDiXiVO
 
 import groovy.json.JsonSlurper
@@ -35,10 +45,242 @@ import groovyx.net.http.*
 
 @Service
 public class NotifyServiceImpl implements NotifyService {
-
+	def gpCountMap =[:];
 	//private static Logger log = LoggerFactory.getLogger("M");
-
-
+	def suffixMoniter(selectGpCacheMap,lastZdf,zdf,platename,moniterType,elseInfo) {
+		
+		if(  !selectGpCacheMap.containsKey(platename)) {
+			selectGpCacheMap[platename] = new LinkedHashMap<String,Float>() {
+				protected boolean removeEldestEntry(Map.Entry<String,Float> eldest) {
+					return size() > 100; //20
+				}
+			}
+		}
+		def hhmm = new SimpleDateFormat("HH_mm_ss").format( System.currentTimeMillis()   )  ;
+		def map =  selectGpCacheMap[platename] ;
+		
+		if(lastZdf.containsKey(platename)) {
+			def lastzdf = lastZdf[platename] ;
+			//println cache;
+			
+			if( (zdf - lastzdf) >= 1.1 ) { 
+				
+				//println  platename+ " " + zdf +"  - "+ lastzdf +" = "+(zdf - lastzdf);
+				def minList = map;
+				def maxValue = -10;
+				minList.each {
+					hhmmKey,zdfFloat->
+					if(zdfFloat > maxValue ) {
+						maxValue = zdfFloat;
+					}
+				}
+				//println platename+ " " +  zdf+ " "+(maxValue)+" - " + (maxValue ) + "  = " + (zdf > (maxValue) )
+				if(minList.size() > 3 &&  (zdf > (maxValue) )    ) {
+					def zdfStr =  format2(zdf) ;
+					println "-----------------"
+					println platename +" "+ zdfStr + "  maxIn5Minute " + maxValue ;
+					println map
+					
+					//有2种监控 一种快速拉升  每3秒 做时间 判断
+					//一种慢监控 每6秒判断拉1.2个点
+					
+					gpCountMap.putIfAbsent(platename,  new java.util.concurrent.atomic.AtomicLong() )
+					def fc = gpCountMap[platename].incrementAndGet();
+					
+					
+					
+					 
+					def msg = getCurrTime () + "\n"  + platename +   (fc==1?"":"【"+fc+"】")  +   " 拉升至  " + zdfStr +"%" + "\n 5分钟内最高 "+format2(maxValue) +"%" // + getTop3ByGN(row.cid,util);
+					msg = msg + elseInfo;
+					//sendMsg(msg,'1000003',  'giTnB3iCtxSTj2ZNd4809flDH_JC5DbPW3I6JMOx2R0');//炸板
+					if(">2" == moniterType) {
+						sendMsg(msg,'1000004',  'PuMOZPQ0ubdUm8o5dFNNlcMJRARRIYMXzMdgjbK4IK8');//个股拉升
+					}else  {
+						sendMsg(msg,'1000006',  'n4TrRsde_tdEZXMbW6gq4INaVP9Gb5_2dPCB65VVoFM');//个股拉升
+					}
+					
+					//sendMsg(msg,'1000005',  'enIF4g9tzwDDrvZGodzH__Pm-TCK95VyhxV1Go6Zc24');
+					//sendImageMsg(code,'1000004',  'PuMOZPQ0ubdUm8o5dFNNlcMJRARRIYMXzMdgjbK4IK8');
+					
+				}
+				
+			}
+		}
+		
+		lastZdf[platename]  = zdf
+		if(map == null) {
+			println  moniterType + " " + platename  + " "+ selectGpCacheMap.size()
+		}
+		
+		map[hhmm] = (float)zdf;
+	}
+	def selectGpCache = [:]
+	def isSelectMonitorRunning = false;
+	def startSelectMonitor() {
+		if(isSelectMonitorRunning) {
+			return ;
+		}
+		isSelectMonitorRunning = true;
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				def cache = [:]
+				def lastZdf = [:]
+				java.util.Random rd = new java.util.Random();
+				def count = 0;
+				def debugadd = [:];
+				//def util= new HtmlUtil();
+				def isDebugModel = false;
+				while(1==1){
+					try {
+						if(isGPRunningTime() || 1==1) {
+								List<ZhangTingDiXiVO> zxlist = RunZhangTingDiXi.getZtdxList();
+								zxlist.each { row ->
+									def code = row.getCid() ;
+									def platename =   row.getName() ;
+									
+									def zdf = NumberUtils.toFloat(row.getZdf()) ;
+									//debug
+									if(isDebugModel) {
+										 def add = rd.nextFloat()+1
+										 def  r1 = rd.nextInt(3) ;
+										 
+										 if(count < 5) {
+											 if(r1==0) {
+												// zdf =  zdf+add
+											 }
+											 
+											 if(r1==1) {
+												// zdf =  zdf- add
+											 }
+										 }else  {
+											 
+											 if( !debugadd.containsKey(platename)) {
+												 debugadd[platename]  = 0 ;
+											 }
+											 if(platename == "大众交通" ) {
+												 debugadd[platename] = debugadd[platename] + add
+												 zdf =  zdf + debugadd[platename]
+											 }
+										 }
+									}
+									suffixMoniter(selectGpCache,lastZdf,zdf,platename,">2",' \n开涨跌 '+row.getKpzdb() + '%'); 
+								}
+								count++;
+								//println cache;
+							println "SelectMonitor round over "+ count
+					
+						}
+					} catch (Exception e) {
+							e.printStackTrace()
+					}finally {
+					    //Thread.sleep(1000 * 15);
+					    Thread.sleep(1000 * 3);
+					}
+				}
+			}
+		}).start();
+	
+	//2板
+	new Thread(new Runnable() {
+		@Override
+		public void run() {
+			def cache = [:]
+			def lastZdf = [:]
+			java.util.Random rd = new java.util.Random();
+			def count = 0;
+			def debugadd = [:];
+			//def util= new HtmlUtil();
+			def isDebugModel = false;
+			while(1==1){
+				try {
+					if(isGPRunningTime() || 1==1) {
+							List<JianKongVO> zt2list = RunJianKong.getList("ZT2D_LIST");
+							zt2list.each { row ->
+								def code = row.getCid() ;
+								def platename =   row.getName() +(" 二进三 ");
+								
+								def zdf = (float)row.getZdf()  ;
+								if(isDebugModel) {
+									 def add = rd.nextFloat()+1
+									 if(count < 5) {
+									 }else  {
+										 if( !debugadd.containsKey(platename)) {
+											 debugadd[platename]  = 0 ;
+										 }
+										 if(platename .contains( "蓝焰控股"  ) ) {
+											 debugadd[platename] = debugadd[platename] + add
+											 zdf =  zdf + debugadd[platename]
+										 }
+									 }
+								}
+								suffixMoniter(selectGpCache,lastZdf,zdf,platename,">2" ,' \n开涨跌 '+row.getKpzdf() + '%');
+							}
+							count++;
+						println "[二进三] Monitor round over "+ count
+				
+					}
+				} catch (Exception e) {
+						e.printStackTrace()
+				}finally {
+					Thread.sleep(1000 * 3);
+				}
+			}
+		}
+	}).start();
+    //昨天涨停监控
+	new Thread(new Runnable() {
+		@Override
+		public void run() {
+			def cache = [:]
+			def lastZdf = [:]
+			java.util.Random rd = new java.util.Random();
+			def count = 0;
+			def debugadd = [:];
+			//def util= new HtmlUtil();
+			def isDebugModel = false;
+			while(1==1){
+				try {
+					if(isGPRunningTime() || 1==1) {
+						  // 涨停个列表
+							List<JianKongVO> ztlist = RunJianKong.getList(JianKongVO.Type.ZT_LIST);
+							// 监控涨停股低高开比
+							QingXuJianKongVO ztjkvo = QingXuJianKongVO.monitor(ztlist);
+							ztlist.each { row ->
+								def code = row.getCid() ;
+								def platename =   row.getName() +" "+ row.getCate();
+								def zdf = (row.getZdf()) ;
+								if(isDebugModel) {
+									 def add = rd.nextFloat()+1
+									 
+									 if(count < 5) {
+									 }else  {
+										 if( !debugadd.containsKey(platename)) {
+											 debugadd[platename]  = 0 ;
+										 }
+										 if(platename .contains ("信达地产" ) ) {
+											 debugadd[platename] = debugadd[platename] + add 
+											 zdf =  zdf + debugadd[platename]
+										 }
+									 }
+								}
+								suffixMoniter(selectGpCache,lastZdf,zdf,platename,"1->2",' \n开涨跌 '+row.getKpzdf() + '%');
+							}
+							count++;
+							//println cache;
+						println "[昨日涨停股监控] ZtMonitor round over "+ count
+				
+					}
+				} catch (Exception e) {
+						e.printStackTrace()
+				}finally {
+					//Thread.sleep(1000 * 15);
+					Thread.sleep(1000 * 3);
+				}
+			}
+		}
+	}).start();
+	}
 
 	def totalAlResult = [:]
 
@@ -65,6 +307,8 @@ public class NotifyServiceImpl implements NotifyService {
 												def msg = getCurrTime () + " " +t.getName() + " 拉升 - 分钟交易量:"+ number+" 当前:"+zdf+"%" ;
 												//sendMsg(msg,'1000003',  'giTnB3iCtxSTj2ZNd4809flDH_JC5DbPW3I6JMOx2R0');
 												sendMsg(msg,'1000004',  'PuMOZPQ0ubdUm8o5dFNNlcMJRARRIYMXzMdgjbK4IK8');
+												//sendImageMsg("sh603122",'1000004',  'PuMOZPQ0ubdUm8o5dFNNlcMJRARRIYMXzMdgjbK4IK8');//个股拉升
+												
 											}
 										}
 									}
@@ -170,13 +414,104 @@ public class NotifyServiceImpl implements NotifyService {
 		}
 		return totalAlResult;
 	}
+	public void startSendMsg() {
+		
+		sendMsg("test 拉升至  9.82% 5分钟内最高 8.62%",'1000004',  'PuMOZPQ0ubdUm8o5dFNNlcMJRARRIYMXzMdgjbK4IK8');//个股拉升
+		long t1 = System.currentTimeMillis();
+		sendImageMsg("sh603122",'1000004',  'PuMOZPQ0ubdUm8o5dFNNlcMJRARRIYMXzMdgjbK4IK8');//个股拉升
+		println   System.currentTimeMillis()-t1;
+		
+	}
+	java.util.Random rd2 = new java.util.Random();
+	
+	public String uploadimgAndGetMediaInfo(cid,corpsecret) throws IOException {
+		RestTemplate restTemplate = new RestTemplate();
+		
+		HttpApi f = new HttpApi('https://qyapi.weixin.qq.com'); //1000003  giTnB3iCtxSTj2ZNd4809flDH_JC5DbPW3I6JMOx2R0
+		def token = f.requestWithFullYParams(null, "/cgi-bin/gettoken",[   "corpid":"ww44f4eb1850de9bf1", "corpsecret":corpsecret]	,[:], Method.GET ,groovyx.net.http.ContentType.JSON);
+		
+		URI uri = UriComponentsBuilder.fromHttpUrl("https://qyapi.weixin.qq.com/cgi-bin/media/upload")
+				.queryParam("access_token", token.access_token)
+				.queryParam("type", "image")
+				.build().toUri();
 
+		//FileSystemResource fileSystemResource = new FileSystemResource("/Users/xinghuapan/Desktop/sz000517.gif");
 
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+		URL url = new URL("http://image.sinajs.cn/newchart/min/n/" + cid + ".gif?0.027675"+rd2.next(10000000));
+		FileUrlResource fileUrlResource = new FileUrlResource(url);
 
+		/*Content-Disposition: form-data; name="media";filename="wework.txt"; filelength=6*/
+		ContentDisposition build = ContentDisposition.builder("form-data").filename("sfsf").build();
+		headers.setContentDisposition(build);
+		MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
+		params.add("media", fileUrlResource);
+
+		HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(params, headers);
+
+		String s = restTemplate.postForObject(uri,requestEntity , String.class);
+		
+		return s;
+	}
+	
+	
+	public void sendImageMsg(cid,agentid,corpsecret) {
+		try {
+			println "sendImage------------> " +cid;
+			HttpApi f = new HttpApi('https://qyapi.weixin.qq.com'); //1000003  giTnB3iCtxSTj2ZNd4809flDH_JC5DbPW3I6JMOx2R0
+			def media = uploadimgAndGetMediaInfo(cid,corpsecret);
+			def jsonSlurper = new JsonSlurper()
+			def map = jsonSlurper.parseText(media)
+				
+			println media;
+			def data =''' {
+				"msgtype": "image",
+				"touser" : "@all",  
+			    "agentid" : "$agentid",
+				"safe":0,
+				 "enable_duplicate_check": 0,
+				  "duplicate_check_interval": 1800,
+				"image": {
+					   "media_id" : "$MEDIA_ID"
+					}
+				}
+			'''
+			/*data  ='''
+			{   "touser" : "@all",
+			   "msgtype" : "news",
+				"agentid" : "$agentid",
+			   "news" : {
+				   "articles" : [
+					   {
+						   "title" : "$text" ,
+					   
+						   
+						   "picurl" : "http://image.sinajs.cn/newchart/min/n/sz000517.gif?0.027675142905902783",
+							   "url" : "http://image.sinajs.cn/newchart/min/n/sz000517.gif?0.027675142905902783",
+					   }
+							]
+			   },
+			   "enable_id_trans": 0,
+			   "enable_duplicate_check": 0,
+			   "duplicate_check_interval": 1800
+			}
+
+				'''*/
+			def engine = new groovy.text.SimpleTemplateEngine()
+			def token = f.requestWithFullYParams(null, "/cgi-bin/gettoken",[   "corpid":"ww44f4eb1850de9bf1", "corpsecret":corpsecret]	,[:], Method.GET ,groovyx.net.http.ContentType.JSON);
+			def output =  engine.createTemplate(data).make(['MEDIA_ID':map.media_id,'agentid':agentid ]).toString()
+			 println output
+			def b = f.requestWithBody( "/cgi-bin/message/send",[   "access_token": token.access_token ]	,output );
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void sendMsg(text,agentid,corpsecret) {
 		try {
 			println text;
-
 			HttpApi f = new HttpApi('https://qyapi.weixin.qq.com'); //1000003  giTnB3iCtxSTj2ZNd4809flDH_JC5DbPW3I6JMOx2R0
 			def token = f.requestWithFullYParams(null, "/cgi-bin/gettoken",[   "corpid":"ww44f4eb1850de9bf1", "corpsecret":corpsecret]	,[:], Method.GET ,groovyx.net.http.ContentType.JSON);
 			def str =''' {
@@ -221,6 +556,8 @@ public class NotifyServiceImpl implements NotifyService {
 	public def  getHead(LinkedHashMap  map) {
 		return map.entrySet().iterator().next();
 	}
+	
+	
 
 	def isGPRunningTime() {
 		def  r =  false;
@@ -262,6 +599,10 @@ public class NotifyServiceImpl implements NotifyService {
 		}
 		if( cmd == "monitorBkCache") {
 			return monitorBkCache
+		}
+		
+		if( cmd == "selectGpCache") {
+			return selectGpCache
 		}
 
 		return 'default';
@@ -337,7 +678,7 @@ public class NotifyServiceImpl implements NotifyService {
 										 def add = rd.nextFloat()
 										 def  r1 = rd.nextInt(2) ; 
 										 
-										 if(count < 30) {
+										 if(count < 5) {
 											 if(r1==0) {
 												 zdf =  zdf+add
 											 }
@@ -361,7 +702,7 @@ public class NotifyServiceImpl implements NotifyService {
 										if(  !monitorBkCache.containsKey(platename)) {
 											monitorBkCache[platename] = new LinkedHashMap<String,Float>() {
 												protected boolean removeEldestEntry(Map.Entry<String,Float> eldest) {
-													return size() > 15; //3
+													return size() > 30; //3 
 												}
 											}	
 										}
@@ -371,8 +712,9 @@ public class NotifyServiceImpl implements NotifyService {
 										if(lastZdf.containsKey(platename)) {
 											def lastzdf = lastZdf[platename] ; 
 											//println cache;
-											//println zdf +"  = "+ lastzdf +" = "+(zdf - lastzdf);
-											if(zdf - lastzdf >= 0.5 ) {
+										
+											if((zdf - lastzdf) >= 0.6 ) {
+												//println platename+" "+zdf +"  - "+ lastzdf +" = "+(zdf - lastzdf);
 												def minList = map;
 												def maxValue = 0;
 												minList.each { 
@@ -381,13 +723,20 @@ public class NotifyServiceImpl implements NotifyService {
 														maxValue = zdfFloat;
 													}
 												}
-												if(minList.size() > 3 &&  (zdf > (maxValue + 0.2) )    ) {
+												def isTimeControl = isGNRunningTime ();//判断是否是9点40之前
+												def  isMoreThan = isTimeControl ? -10 : 1.5 
+												
+												if(minList.size() > 10 &&  (zdf > (maxValue + 0.2) )  && zdf >= isMoreThan  ) {  
 													def zdfStr =  format2(zdf) ; 
 													println "-----------------"
 													println platename +" "+ zdfStr + "  maxIn5Minute " + maxValue ; 
 													println map
-													 
-													def msg = getCurrTime () + " 板块 - " + platename + " 拉升至  " + zdfStr +"%" // + getTop3ByGN(row.cid,util);
+													 /*
+													  * 板块拉升
+													  *  1分钟之内的不算 1分钟之后开始监控 如果有涨大于  0.7  监控时间 3分钟  
+													  *  9点40之前 只要涨幅大于值 就通知 ,50之后且判断当前值 在1.5以上再推送
+													  */
+													def msg = getCurrTime () + " " + platename + " 拉升至  " + zdfStr +"%"  + "\n 5分钟内最高 "+format2(maxValue) +"%" /// + getTop3ByGN(row.cid,util);
 													//sendMsg(msg,'1000003',  'giTnB3iCtxSTj2ZNd4809flDH_JC5DbPW3I6JMOx2R0');//炸板
 													//sendMsg(msg,'1000004',  'PuMOZPQ0ubdUm8o5dFNNlcMJRARRIYMXzMdgjbK4IK8');//个股拉升
 													sendMsg(msg,'1000005',  'enIF4g9tzwDDrvZGodzH__Pm-TCK95VyhxV1Go6Zc24');
@@ -395,26 +744,38 @@ public class NotifyServiceImpl implements NotifyService {
 												}
 												
 											}
-										}else  {
-											lastZdf[platename]  = zdf
-										}
+										} 
+									    lastZdf[platename]  = zdf
+										
 										map[hhmm] = (float)zdf;
 										
 									}
 								}
 								count++;
 								//println cache;
-							println "GnMoniter round over "+ count
+							println "[概念板块监控]GnMoniter round over "+ count
 					
 						}
 					} catch (Exception e) {
 							e.printStackTrace()
 					}finally {
-							Thread.sleep(1000*20);
+							Thread.sleep(1000 * 6);
 					}
 				}
 			}
 		}).start();
+	}
+	
+	def isGNRunningTime() {
+		def  r =  false;
+		GregorianCalendar calendar = new GregorianCalendar();
+		int hour = calendar.get(Calendar.HOUR_OF_DAY);
+		int nowMin = calendar.get(Calendar.MINUTE);
+
+		if(hour == 9  && nowMin <= 40) {
+			r = true;
+		}
+		return r;
 	}
 	
 	def getTop3ByGN(k,util) {

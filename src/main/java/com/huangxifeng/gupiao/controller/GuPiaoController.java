@@ -1,6 +1,7 @@
 package com.huangxifeng.gupiao.controller;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -62,6 +63,31 @@ public class GuPiaoController {
 		// 监控涨停股低高开比
 		QingXuJianKongVO ztjkvo = QingXuJianKongVO.monitor(ztlist);
 		RunJianKong.sort(ztlist, "cate");
+		return ztlist;
+	}
+
+	/*
+	 *  连续两天涨停
+	 */
+	@RequestMapping(value = "/ztdx-yestZt")
+	@ResponseBody
+	public Object yestZt(TableRequest req) { 
+		
+		// 涨停个列表
+				List<JianKongVO> ztlist = RunJianKong.getList(JianKongVO.Type.ZT_LIST);
+				QingXuJianKongVO.monitor(ztlist);
+
+				Map<String, String> sortField = req.getOrder() == null ? null : req.getOrder().get(0);
+				Map.Entry<String, String> entry = null;
+				if (sortField != null) {
+					entry = sortField.entrySet().iterator().next();
+					if (entry.getKey() != null) {
+						RunJianKong.sort(ztlist, entry.getKey());
+					}
+				}
+				
+				
+		
 		return ztlist;
 	}
 
