@@ -47,7 +47,7 @@ import groovyx.net.http.*
 public class NotifyServiceImpl implements NotifyService {
 	def gpCountMap =[:];
 	//private static Logger log = LoggerFactory.getLogger("M");
-	def suffixMoniter(selectGpCacheMap,lastZdf,zdf,platename,moniterType,elseInfo) {
+	def suffixMoniter(selectGpCacheMap,lastZdf,zdf,platename,code,moniterType,elseInfo) {
 		
 		if(  !selectGpCacheMap.containsKey(platename)) {
 			selectGpCacheMap[platename] = new LinkedHashMap<String,Float>() {
@@ -96,7 +96,8 @@ public class NotifyServiceImpl implements NotifyService {
 					if(">2" == moniterType) {
 						sendMsg(msg,'1000004',  'PuMOZPQ0ubdUm8o5dFNNlcMJRARRIYMXzMdgjbK4IK8');//个股拉升
 					}else  {
-						sendMsg(msg,'1000006',  'n4TrRsde_tdEZXMbW6gq4INaVP9Gb5_2dPCB65VVoFM');//个股拉升
+						sendMsg(msg,'1000006',  'n4TrRsde_tdEZXMbW6gq4INaVP9Gb5_2dPCB65VVoFM');//一进二通知
+						sendImageMsg(code,'1000006',  'n4TrRsde_tdEZXMbW6gq4INaVP9Gb5_2dPCB65VVoFM');
 					}
 					
 					//sendMsg(msg,'1000005',  'enIF4g9tzwDDrvZGodzH__Pm-TCK95VyhxV1Go6Zc24');
@@ -164,10 +165,11 @@ public class NotifyServiceImpl implements NotifyService {
 											 }
 										 }
 									}
-									suffixMoniter(selectGpCache,lastZdf,zdf,platename,">2",' \n开涨跌 '+row.getKpzdb() + '%'); 
+									suffixMoniter(selectGpCache,lastZdf,zdf,platename,code,">2",' \n开涨跌 '+row.getKpzdb() + '%'); 
 								}
 								count++;
 								//println cache;
+								if(count < 7)
 							println "SelectMonitor round over "+ count
 					
 						}
@@ -214,9 +216,10 @@ public class NotifyServiceImpl implements NotifyService {
 										 }
 									 }
 								}
-								suffixMoniter(selectGpCache,lastZdf,zdf,platename,">2" ,' \n开涨跌 '+row.getKpzdf() + '%');
+								suffixMoniter(selectGpCache,lastZdf,zdf,platename,code,">2" ,' \n开涨跌 '+row.getKpzdf() + '%');
 							}
 							count++;
+						if(count < 7)
 						println "[二进三] Monitor round over "+ count
 				
 					}
@@ -238,7 +241,7 @@ public class NotifyServiceImpl implements NotifyService {
 			def count = 0;
 			def debugadd = [:];
 			//def util= new HtmlUtil();
-			def isDebugModel = false;
+			def isDebugModel = false 
 			while(1==1){
 				try {
 					if(isGPRunningTime() || 1==1) {
@@ -258,16 +261,17 @@ public class NotifyServiceImpl implements NotifyService {
 										 if( !debugadd.containsKey(platename)) {
 											 debugadd[platename]  = 0 ;
 										 }
-										 if(platename .contains ("信达地产" ) ) {
+										 if(platename .contains ("上海三毛" ) ) {
 											 debugadd[platename] = debugadd[platename] + add 
 											 zdf =  zdf + debugadd[platename]
 										 }
 									 }
 								}
-								suffixMoniter(selectGpCache,lastZdf,zdf,platename,"1->2",' \n开涨跌 '+row.getKpzdf() + '%');
+								suffixMoniter(selectGpCache,lastZdf,zdf,platename,code,"1->2",' \n开涨跌 '+row.getKpzdf() + '%');
 							}
 							count++;
 							//println cache;
+						if(count < 7)
 						println "[昨日涨停股监控] ZtMonitor round over "+ count
 				
 					}
@@ -458,13 +462,13 @@ public class NotifyServiceImpl implements NotifyService {
 	
 	public void sendImageMsg(cid,agentid,corpsecret) {
 		try {
-			println "sendImage------------> " +cid;
+			//println "sendImage------------> " +cid;
 			HttpApi f = new HttpApi('https://qyapi.weixin.qq.com'); //1000003  giTnB3iCtxSTj2ZNd4809flDH_JC5DbPW3I6JMOx2R0
 			def media = uploadimgAndGetMediaInfo(cid,corpsecret);
 			def jsonSlurper = new JsonSlurper()
 			def map = jsonSlurper.parseText(media)
 				
-			println media;
+			//println media;
 			def data =''' {
 				"msgtype": "image",
 				"touser" : "@all",  
@@ -501,7 +505,7 @@ public class NotifyServiceImpl implements NotifyService {
 			def engine = new groovy.text.SimpleTemplateEngine()
 			def token = f.requestWithFullYParams(null, "/cgi-bin/gettoken",[   "corpid":"ww44f4eb1850de9bf1", "corpsecret":corpsecret]	,[:], Method.GET ,groovyx.net.http.ContentType.JSON);
 			def output =  engine.createTemplate(data).make(['MEDIA_ID':map.media_id,'agentid':agentid ]).toString()
-			 println output
+			 //println output
 			def b = f.requestWithBody( "/cgi-bin/message/send",[   "access_token": token.access_token ]	,output );
 			
 		}catch(Exception e) {
@@ -753,6 +757,7 @@ public class NotifyServiceImpl implements NotifyService {
 								}
 								count++;
 								//println cache;
+							if(count < 7)
 							println "[概念板块监控]GnMoniter round over "+ count
 					
 						}
@@ -1149,7 +1154,12 @@ public class NotifyServiceImpl implements NotifyService {
 							}
 						}
 					}
-					println "\n" + cache.toString().replaceAll(",","\n").replaceAll("\\[","").replaceAll("\\]","");
+					//println "\n" + cache.toString().replaceAll(",","\n").replaceAll("\\[","").replaceAll("\\]","");
+					def buffer = new StringBuffer()
+					cache.each { k,v->
+						buffer.append(" "+  k+" "+v+ "\n")
+					}
+					println buffer .toString();
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
